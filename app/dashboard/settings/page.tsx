@@ -1,5 +1,5 @@
 import { getCompanyProfile } from "@/actions/company.actions";
-import { CompanyProfileForm } from "@/components/CompanyProfileForm";
+import { CompanyProfileForm } from "@/components/company/CompanyProfileForm";
 
 /**
  * Settings page - server component that fetches the current

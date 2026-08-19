@@ -15,6 +15,7 @@ export type SaveCompanyProfileState = {
   success: boolean;
   errors?: Record<string, string[] | undefined>;
   message?: string;
+  submittedValues?: Record<string, string>;
 };
 
 /**
@@ -90,6 +91,18 @@ export async function saveCompanyProfile(
       success: false,
       errors: z.flattenError(parsed.error).fieldErrors,
       message: "Please fix the errors below.",
+      submittedValues: {
+        name: String(raw.name ?? ""),
+        orgNr: String(raw.orgNr ?? ""),
+        address: String(raw.address ?? ""),
+        phone: String(raw.phone ?? ""),
+        email: String(raw.email ?? ""),
+        mvaRegisteredFrom: String(raw.mvaRegisteredFrom ?? ""),
+        defaultCurrency: String(raw.defaultCurrency ?? "NOK"),
+        ibanOrAccount: String(raw.ibanOrAccount ?? ""),
+        bic: String(raw.bic ?? ""),
+        bankName: String(raw.bankName ?? ""),
+      },
     };
   }
 
@@ -119,7 +132,7 @@ export async function saveCompanyProfile(
 
   // Clear Next.js's cached copy of the settings page so the next
   // render reflects the freshly saved data.
-  revalidatePath("/settings");
+  revalidatePath("/dashboard/settings");
 
   return { success: true, message: "Company profile saved successfully." };
 }
