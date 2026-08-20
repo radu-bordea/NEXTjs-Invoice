@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useActionState, useState } from "react"
+import { useActionState, useState, useEffect } from "react";
 import {
   saveCompanyProfile,
   type SaveCompanyProfileState,
-} from "@/actions/company.actions"
-import type { CompanyProfile } from "@/app/generated/prisma/client"
+} from "@/actions/company.actions";
+import type { CompanyProfile } from "@/app/generated/prisma/client";
 
-const initialState: SaveCompanyProfileState = { success: false }
+const initialState: SaveCompanyProfileState = { success: false };
 
 /**
  * Displays the company profile as read-only, with an Edit button
@@ -19,22 +19,24 @@ const initialState: SaveCompanyProfileState = { success: false }
 export function CompanyProfileForm({
   profile,
 }: {
-  profile: CompanyProfile | null
+  profile: CompanyProfile | null;
 }) {
-  // Start in edit mode automatically if there's no profile yet —
-  // otherwise default to the safer read-only view.
-  const [isEditing, setIsEditing] = useState(profile === null)
+  const [isEditing, setIsEditing] = useState(profile === null);
 
   const [state, formAction, isPending] = useActionState(
     saveCompanyProfile,
-    initialState
-  )
+    initialState,
+  );
 
-  // After a successful save, drop back into read-only view so the
-  // user sees their confirmed data instead of the form staying open.
-  if (state.success && isEditing) {
-    setIsEditing(false)
-  }
+  // After a successful save, drop back into read-only view. Runs
+  // only when `state` actually changes (i.e. right after a new
+  // submission completes) — not on every re-render, which is what
+  // caused clicking "Edit" to immediately bounce back to view mode.
+  useEffect(() => {
+    if (state.success) {
+      setIsEditing(false);
+    }
+  }, [state]);
 
   if (!isEditing && profile) {
     return (
@@ -54,19 +56,22 @@ export function CompanyProfileForm({
             }
           />
           <ViewRow label="Default currency" value={profile.defaultCurrency} />
-          <ViewRow label="IBAN / account number" value={profile.ibanOrAccount} />
+          <ViewRow
+            label="IBAN / account number"
+            value={profile.ibanOrAccount}
+          />
           <ViewRow label="BIC/SWIFT" value={profile.bic || "—"} />
           <ViewRow label="Bank name" value={profile.bankName} />
         </div>
 
         <button
           onClick={() => setIsEditing(true)}
-          className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors"
+          className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors cursor-pointer"
         >
           Edit profile
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -74,24 +79,28 @@ export function CompanyProfileForm({
       <Field
         label="Company name"
         name="name"
+        required
         defaultValue={state.submittedValues?.name ?? profile?.name}
         error={state.errors?.name}
       />
       <Field
         label="Org.nr"
         name="orgNr"
+        required
         defaultValue={state.submittedValues?.orgNr ?? profile?.orgNr}
         error={state.errors?.orgNr}
       />
       <Field
         label="Address"
         name="address"
+        required
         defaultValue={state.submittedValues?.address ?? profile?.address}
         error={state.errors?.address}
       />
       <Field
         label="Phone"
         name="phone"
+        required
         defaultValue={state.submittedValues?.phone ?? profile?.phone}
         error={state.errors?.phone}
       />
@@ -99,6 +108,7 @@ export function CompanyProfileForm({
         label="Email"
         name="email"
         type="email"
+        required
         defaultValue={state.submittedValues?.email ?? profile?.email}
         error={state.errors?.email}
       />
@@ -137,6 +147,7 @@ export function CompanyProfileForm({
       <Field
         label="IBAN / account number"
         name="ibanOrAccount"
+        required
         defaultValue={
           state.submittedValues?.ibanOrAccount ?? profile?.ibanOrAccount
         }
@@ -151,6 +162,7 @@ export function CompanyProfileForm({
       <Field
         label="Bank name"
         name="bankName"
+        required
         defaultValue={state.submittedValues?.bankName ?? profile?.bankName}
         error={state.errors?.bankName}
       />
@@ -169,24 +181,23 @@ export function CompanyProfileForm({
         <button
           type="submit"
           disabled={isPending}
-          className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50"
+          className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
         >
           {isPending ? "Saving..." : "Save profile"}
         </button>
 
-        {/* Only show Cancel if there's an existing profile to go back to */}
         {profile && (
           <button
             type="button"
             onClick={() => setIsEditing(false)}
-            className="rounded-full font-medium px-6 py-3 border hover:bg-gray-50 transition-colors"
+            className="rounded-full font-medium px-6 py-3 border hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Cancel
           </button>
         )}
       </div>
     </form>
-  )
+  );
 }
 
 /**
@@ -198,11 +209,13 @@ function ViewRow({ label, value }: { label: string; value?: string | null }) {
       <p className="text-sm text-gray-500">{label}</p>
       <p className="text-base">{value || "—"}</p>
     </div>
-  )
+  );
 }
 
 /**
- * Reusable labeled text input with inline Zod error display.
+ * Reusable labeled text input with inline Zod error display and an
+ * asterisk next to the label when the field is required, so the
+ * user knows before submitting — not only after a failed validation.
  */
 function Field({
   label,
@@ -210,16 +223,21 @@ function Field({
   type = "text",
   defaultValue,
   error,
+  required = false,
 }: {
-  label: string
-  name: string
-  type?: string
-  defaultValue?: string | null
-  error?: string[]
+  label: string;
+  name: string;
+  type?: string;
+  defaultValue?: string | null;
+  error?: string[];
+  required?: boolean;
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block text-sm font-medium mb-1">
+        {label}
+        {required && <span className="text-red-600 ml-0.5">*</span>}
+      </label>
       <input
         name={name}
         type={type}
@@ -228,5 +246,5 @@ function Field({
       />
       {error && <p className="text-sm text-red-600 mt-1">{error[0]}</p>}
     </div>
-  )
+  );
 }

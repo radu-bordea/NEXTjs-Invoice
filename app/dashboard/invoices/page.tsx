@@ -120,21 +120,21 @@ export default async function InvoicesPage({
                       className="text-gray-600 hover:text-teal-700"
                       title="View"
                     >
-                      <Eye className="text-green-600" size={16} />
+                      <Eye className="text-green-600 cursor-pointer" size={16} />
                     </Link>
                     <Link
                       href={`/dashboard/invoices/${invoice.id}/edit`}
                       className="text-gray-600 hover:text-teal-700"
                       title="Edit"
                     >
-                      <Pencil className="text-yellow-500" size={16} />
+                      <Pencil className="text-yellow-500 cursor-pointer" size={16} />
                     </Link>
                     <a
                       href={`/dashboard/invoices/${invoice.id}/pdf`}
                       className="text-gray-600 hover:text-teal-700"
                       title="Download PDF"
                     >
-                      <FileDown className="text-red-700" size={16} />
+                      <FileDown className="text-red-700 cursor-pointer" size={16} />
                     </a>
                   </div>
                 </td>
