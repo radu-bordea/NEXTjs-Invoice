@@ -6,11 +6,6 @@ import {
   type CreateInvoiceState,
 } from "@/actions/invoice.actions"
 
-/**
- * Shape of one work-log row while it's being edited in the form.
- * Purely client-side state — not a Prisma type, since it doesn't
- * exist as a database row until the invoice is actually created.
- */
 type LineItemRow = {
   date: string
   description: string
@@ -22,15 +17,6 @@ const emptyRow: LineItemRow = { date: "", description: "", hours: "", rate: "" }
 
 const initialState: CreateInvoiceState = { success: false }
 
-/**
- * Invoice creation form. Toggles between HOURLY (dynamic work-log
- * table) and FIXED (single price field) billing types.
- *
- * Line items are tracked in local useState (since they don't exist
- * as form fields the browser understands natively), then serialized
- * to JSON into a hidden input right before submit so the server
- * action can read them out of FormData.
- */
 export function InvoiceForm() {
   const [state, formAction, isPending] = useActionState(
     createInvoice,
@@ -54,8 +40,6 @@ export function InvoiceForm() {
     )
   }
 
-  // Running total for the HOURLY table, purely for on-screen
-  // feedback — the real total is calculated server-side.
   const hourlyTotal = lineItems.reduce((sum, row) => {
     const hours = parseFloat(row.hours) || 0
     const rate = parseFloat(row.rate) || 0
@@ -64,7 +48,6 @@ export function InvoiceForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Billing type toggle */}
       <div>
         <label className="block text-sm font-medium mb-1">Billing type</label>
         <div className="flex gap-2">
@@ -91,31 +74,85 @@ export function InvoiceForm() {
             Fixed price
           </button>
         </div>
-        {/* This hidden input is what actually reaches the server
-            action's FormData — the buttons above are just UI. */}
         <input type="hidden" name="billingType" value={billingType} />
       </div>
 
-      {/* Client details */}
       <fieldset className="space-y-4 border rounded-lg p-4">
         <legend className="text-sm font-medium px-1">Client</legend>
-        <Field label="Client name" name="clientName" error={state.errors?.clientName} />
-        <Field label="Org.nr (optional)" name="clientOrgNr" error={state.errors?.clientOrgNr} />
-        <Field label="Address" name="clientAddress" error={state.errors?.clientAddress} />
-        <Field label="Email (optional)" name="clientEmail" type="email" error={state.errors?.clientEmail} />
+        <Field
+          label="Client name"
+          name="clientName"
+          required
+          defaultValue={state.submittedValues?.clientName}
+          error={state.errors?.clientName}
+        />
+        <Field
+          label="Org.nr"
+          name="clientOrgNr"
+          defaultValue={state.submittedValues?.clientOrgNr}
+          error={state.errors?.clientOrgNr}
+        />
+        <Field
+          label="Address"
+          name="clientAddress"
+          required
+          defaultValue={state.submittedValues?.clientAddress}
+          error={state.errors?.clientAddress}
+        />
+        <Field
+          label="Email"
+          name="clientEmail"
+          type="email"
+          defaultValue={state.submittedValues?.clientEmail}
+          error={state.errors?.clientEmail}
+        />
       </fieldset>
 
-      {/* Invoice details */}
       <fieldset className="space-y-4 border rounded-lg p-4">
         <legend className="text-sm font-medium px-1">Invoice details</legend>
-        <Field label="Invoice date" name="invoiceDate" type="date" error={state.errors?.invoiceDate} />
-        <Field label="Due date" name="dueDate" type="date" error={state.errors?.dueDate} />
-        <Field label="Period start (optional)" name="periodStart" type="date" error={state.errors?.periodStart} />
-        <Field label="Period end (optional)" name="periodEnd" type="date" error={state.errors?.periodEnd} />
-        <Field label="Project reference (optional)" name="projectRef" error={state.errors?.projectRef} />
+        <Field
+          label="Invoice date"
+          name="invoiceDate"
+          type="date"
+          required
+          defaultValue={state.submittedValues?.invoiceDate}
+          error={state.errors?.invoiceDate}
+        />
+        <Field
+          label="Due date"
+          name="dueDate"
+          type="date"
+          required
+          defaultValue={state.submittedValues?.dueDate}
+          error={state.errors?.dueDate}
+        />
+        <Field
+          label="Period start"
+          name="periodStart"
+          type="date"
+          defaultValue={state.submittedValues?.periodStart}
+          error={state.errors?.periodStart}
+        />
+        <Field
+          label="Period end"
+          name="periodEnd"
+          type="date"
+          defaultValue={state.submittedValues?.periodEnd}
+          error={state.errors?.periodEnd}
+        />
+        <Field
+          label="Project reference"
+          name="projectRef"
+          defaultValue={state.submittedValues?.projectRef}
+          error={state.errors?.projectRef}
+        />
         <div>
           <label className="block text-sm font-medium mb-1">Currency</label>
-          <select name="currency" defaultValue="NOK" className="w-full px-4 py-2 border rounded-lg">
+          <select
+            name="currency"
+            defaultValue={state.submittedValues?.currency ?? "NOK"}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
             <option value="NOK">NOK</option>
             <option value="EUR">EUR</option>
             <option value="USD">USD</option>
@@ -123,10 +160,11 @@ export function InvoiceForm() {
         </div>
       </fieldset>
 
-      {/* HOURLY: work log table */}
       {billingType === "HOURLY" && (
         <fieldset className="space-y-3 border rounded-lg p-4">
-          <legend className="text-sm font-medium px-1">Work log</legend>
+          <legend className="text-sm font-medium px-1">
+            Work log <span className="text-red-600">*</span>
+          </legend>
 
           {lineItems.map((row, index) => (
             <div key={index} className="grid grid-cols-[1fr_2fr_80px_80px_auto] gap-2 items-start">
@@ -186,17 +224,21 @@ export function InvoiceForm() {
             <p className="text-sm text-red-600">{state.errors.lineItems[0]}</p>
           )}
 
-          {/* Serialized line items — this is what the server action
-              actually reads out of FormData. */}
           <input type="hidden" name="lineItems" value={JSON.stringify(lineItems)} />
         </fieldset>
       )}
 
-      {/* FIXED: single price field */}
       {billingType === "FIXED" && (
         <fieldset className="border rounded-lg p-4">
           <legend className="text-sm font-medium px-1">Fixed price</legend>
-          <Field label="Project price" name="fixedPrice" type="number" error={state.errors?.fixedPrice} />
+          <Field
+            label="Project price"
+            name="fixedPrice"
+            type="number"
+            required
+            defaultValue={state.submittedValues?.fixedPrice}
+            error={state.errors?.fixedPrice}
+          />
         </fieldset>
       )}
 
@@ -218,24 +260,37 @@ export function InvoiceForm() {
 }
 
 /**
- * Reusable labeled input with inline error display, same pattern
- * as CompanyProfileForm's Field helper.
+ * Reusable labeled input with inline error display and an
+ * asterisk next to the label when the field is required, so the
+ * user knows before submitting — not only after a failed validation.
  */
 function Field({
   label,
   name,
   type = "text",
   error,
+  required = false,
+  defaultValue,
 }: {
   label: string
   name: string
   type?: string
   error?: string[]
+  required?: boolean
+  defaultValue?: string
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
-      <input name={name} type={type} className="w-full px-4 py-2 border rounded-lg" />
+      <label className="block text-sm font-medium mb-1">
+        {label}
+        {required && <span className="text-red-600 ml-0.5">*</span>}
+      </label>
+      <input
+        name={name}
+        type={type}
+        defaultValue={defaultValue ?? ""}
+        className="w-full px-4 py-2 border rounded-lg"
+      />
       {error && <p className="text-sm text-red-600 mt-1">{error[0]}</p>}
     </div>
   )

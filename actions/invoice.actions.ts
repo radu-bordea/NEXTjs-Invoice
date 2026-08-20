@@ -1,11 +1,11 @@
-"use server";
+"use server"
 
-import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
-import { invoiceSchema } from "@/lib/zod/invoice.schema";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import z from "zod";
+import { auth } from "@clerk/nextjs/server"
+import prisma from "@/lib/prisma"
+import { invoiceSchema } from "@/lib/zod/invoice.schema"
+import { z } from "zod"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 /**
  * Shape of the object returned by `createInvoice`.
@@ -13,10 +13,11 @@ import z from "zod";
  * SaveCompanyProfileState.
  */
 export type CreateInvoiceState = {
-  success: boolean;
-  errors?: Record<string, string[] | undefined>;
-  message?: string;
-};
+  success: boolean
+  errors?: Record<string, string[] | undefined>
+  message?: string
+  submittedValues?: Record<string, string>
+}
 
 /**
  * Generates the next invoice number for the current user, scoped
@@ -26,28 +27,24 @@ export type CreateInvoiceState = {
  * increments it. Starts fresh at "-01" each new year.
  */
 async function getNextInvoiceNumber(userId: string): Promise<string> {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
 
-  // Find this user's invoices from the current year only, sorted
-  // so the most recent invoiceNumber comes first.
   const lastInvoice = await prisma.invoice.findFirst({
     where: {
       userId,
       invoiceNumber: { startsWith: `${currentYear}-` },
     },
     orderBy: { invoiceNumber: "desc" },
-  });
+  })
 
   if (!lastInvoice) {
-    return `${currentYear}-01`;
+    return `${currentYear}-01`
   }
 
-  // invoiceNumber looks like "2026-07" — split on "-" and take the
-  // second part as the sequence number, then increment it.
-  const lastSequence = parseInt(lastInvoice.invoiceNumber.split("-")[1], 10);
-  const nextSequence = (lastSequence + 1).toString().padStart(2, "0");
+  const lastSequence = parseInt(lastInvoice.invoiceNumber.split("-")[1], 10)
+  const nextSequence = (lastSequence + 1).toString().padStart(2, "0")
 
-  return `${currentYear}-${nextSequence}`;
+  return `${currentYear}-${nextSequence}`
 }
 
 /**
@@ -59,45 +56,41 @@ async function getNextInvoiceNumber(userId: string): Promise<string> {
  * invoices. Also snapshots mvaRegisteredFrom the same way, for the
  * per-line-item VAT calculation we'll do at PDF-generation time.
  *
+ * On failed validation, echoes back the submitted values so the
+ * form doesn't reset to blank — same pattern as CompanyProfile.
+ *
  * @param _prevState - previous action state (useActionState convention)
  * @param formData - submitted form fields, including a JSON-encoded
  *   "lineItems" field for HOURLY invoices
  */
 export async function createInvoice(
   _prevState: CreateInvoiceState,
-  formData: FormData,
+  formData: FormData
 ): Promise<CreateInvoiceState> {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
 
-  // Every invoice needs issuer details — pulled from the company
-  // profile the user already filled out. Block invoice creation
-  // entirely if there's no profile yet, since we'd have nothing
-  // to put in the "from" section of the PDF.
   const companyProfile = await prisma.companyProfile.findUnique({
     where: { userId },
-  });
+  })
 
   if (!companyProfile) {
     return {
       success: false,
-      message:
-        "Please complete your company profile before creating an invoice.",
-    };
+      message: "Please complete your company profile before creating an invoice.",
+    }
   }
 
-  // Line items arrive as a JSON string from a hidden input in the
-  // form (FormData can't represent nested arrays natively).
-  const lineItemsRaw = formData.get("lineItems");
-  let lineItems: unknown[] = [];
+  const lineItemsRaw = formData.get("lineItems")
+  let lineItems: unknown[] = []
   if (typeof lineItemsRaw === "string" && lineItemsRaw.length > 0) {
     try {
-      lineItems = JSON.parse(lineItemsRaw);
+      lineItems = JSON.parse(lineItemsRaw)
     } catch {
       return {
         success: false,
         message: "Invalid line items data.",
-      };
+      }
     }
   }
 
@@ -119,20 +112,33 @@ export async function createInvoice(
     // by the form — placeholder here just so the schema has
     // something to validate against before we overwrite it.
     invoiceNumber: "pending",
-  };
+  }
 
-  const parsed = invoiceSchema.safeParse(raw);
+  const parsed = invoiceSchema.safeParse(raw)
 
   if (!parsed.success) {
     return {
       success: false,
       errors: z.flattenError(parsed.error).fieldErrors,
       message: "Please fix the errors below.",
-    };
+      submittedValues: {
+        clientName: String(raw.clientName ?? ""),
+        clientOrgNr: String(raw.clientOrgNr ?? ""),
+        clientAddress: String(raw.clientAddress ?? ""),
+        clientEmail: String(raw.clientEmail ?? ""),
+        invoiceDate: String(raw.invoiceDate ?? ""),
+        dueDate: String(raw.dueDate ?? ""),
+        periodStart: String(raw.periodStart ?? ""),
+        periodEnd: String(raw.periodEnd ?? ""),
+        projectRef: String(raw.projectRef ?? ""),
+        currency: String(raw.currency ?? "NOK"),
+        fixedPrice: String(raw.fixedPrice ?? ""),
+      },
+    }
   }
 
-  const data = parsed.data;
-  const invoiceNumber = await getNextInvoiceNumber(userId);
+  const data = parsed.data
+  const invoiceNumber = await getNextInvoiceNumber(userId)
 
   await prisma.invoice.create({
     data: {
@@ -144,7 +150,6 @@ export async function createInvoice(
       periodEnd: data.periodEnd ? new Date(data.periodEnd) : null,
       projectRef: data.projectRef || null,
 
-      // Snapshot issuer details from the profile at creation time.
       issuerName: companyProfile.name,
       issuerOrgNr: companyProfile.orgNr,
       issuerAddress: companyProfile.address,
@@ -164,14 +169,10 @@ export async function createInvoice(
       bic: companyProfile.bic,
       bankName: companyProfile.bankName,
 
-      // Snapshot the MVA registration date too, so past invoices
-      // don't recalculate VAT if this changes later.
       mvaRegisteredFrom: companyProfile.mvaRegisteredFrom,
 
       status: "DRAFT",
 
-      // Nested create: builds the related WorkLogItem rows in the
-      // same database call as the invoice itself.
       lineItems: {
         create: data.lineItems?.map((item) => ({
           date: new Date(item.date),
@@ -181,8 +182,8 @@ export async function createInvoice(
         })),
       },
     },
-  });
+  })
 
-  revalidatePath("/dashboard/invoices");
-  redirect("/dashboard/invoices");
+  revalidatePath("/dashboard/invoices")
+  redirect("/dashboard/invoices")
 }

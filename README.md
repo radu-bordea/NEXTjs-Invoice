@@ -6,6 +6,7 @@
 - npm install @clerk/nextjs @prisma/client zod react-hook-form @hookform/resolvers
 - npm install -D prisma
 - npm install @react-pdf/renderer
+- npm install lucide-react
 
 # files
 - find app -type f
