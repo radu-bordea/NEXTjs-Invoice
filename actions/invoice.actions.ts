@@ -187,3 +187,32 @@ export async function createInvoice(
   revalidatePath("/dashboard/invoices")
   redirect("/dashboard/invoices")
 }
+
+/**
+ * Updates just the status field of an invoice (DRAFT -> SENT -> PAID).
+ * Confirms the invoice belongs to the logged-in user before updating,
+ * since invoice IDs are visible/guessable in the URL.
+ */
+export async function updateInvoiceStatus(
+  invoiceId: string,
+  newStatus: "DRAFT" | "SENT" | "PAID"
+) {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
+
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+  })
+
+  if (!invoice || invoice.userId !== userId) {
+    throw new Error("Invoice not found")
+  }
+
+  await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: { status: newStatus },
+  })
+
+  revalidatePath(`/dashboard/invoices/${invoiceId}`)
+  revalidatePath("/dashboard/invoices")
+}

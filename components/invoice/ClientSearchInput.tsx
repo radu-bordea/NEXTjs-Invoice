@@ -21,6 +21,13 @@ export function ClientSearchInput() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString())
+      const currentClient = params.get("client") ?? ""
+
+      // Skip navigating if nothing actually changed — without this,
+      // the effect could keep re-triggering itself via the router
+      // push causing a re-render, which is what caused the request
+      // spam you saw in the terminal.
+      if (currentClient === value) return
 
       if (value) {
         params.set("client", value)
@@ -29,12 +36,11 @@ export function ClientSearchInput() {
       }
 
       router.push(`/dashboard/invoices?${params.toString()}`)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, 300)
 
-    // Cancel the pending update if the user types again before
-    // the 300ms window elapses — this is the actual debounce.
     return () => clearTimeout(timeout)
-  }, [value, router, searchParams])
+  }, [value])
 
   return (
     <input

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Eye, Pencil, FileDown } from "lucide-react";
 import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
+import { StatusBadge } from "@/components/invoice/StatusBadge";
 
 /**
  * Invoice list page. Supports filtering by status and searching by
@@ -112,7 +113,9 @@ export default async function InvoicesPage({
                   {invoice.currency}{" "}
                   {invoice.fixedPrice ? invoice.fixedPrice.toString() : "—"}
                 </td>
-                <td className="py-2 px-3 text-left">{invoice.status}</td>
+                <td className="py-2 px-3 text-left">
+                  <StatusBadge status={invoice.status} />
+                </td>
                 <td className="py-2 px-3 text-left">
                   <div className="flex gap-3">
                     <Link
@@ -120,21 +123,30 @@ export default async function InvoicesPage({
                       className="text-gray-600 hover:text-teal-700"
                       title="View"
                     >
-                      <Eye className="text-green-600 cursor-pointer" size={16} />
+                      <Eye
+                        className="text-green-600 cursor-pointer"
+                        size={16}
+                      />
                     </Link>
                     <Link
                       href={`/dashboard/invoices/${invoice.id}/edit`}
                       className="text-gray-600 hover:text-teal-700"
                       title="Edit"
                     >
-                      <Pencil className="text-yellow-500 cursor-pointer" size={16} />
+                      <Pencil
+                        className="text-yellow-500 cursor-pointer"
+                        size={16}
+                      />
                     </Link>
                     <a
                       href={`/dashboard/invoices/${invoice.id}/pdf`}
                       className="text-gray-600 hover:text-teal-700"
                       title="Download PDF"
                     >
-                      <FileDown className="text-red-700 cursor-pointer" size={16} />
+                      <FileDown
+                        className="text-red-700 cursor-pointer"
+                        size={16}
+                      />
                     </a>
                   </div>
                 </td>
