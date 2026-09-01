@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Eye, Pencil, FileDown } from "lucide-react";
 import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
+import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
 /**
  * Invoice list page. Supports filtering by status and searching by
@@ -30,6 +31,7 @@ export default async function InvoicesPage({
         : {}),
     },
     orderBy: { invoiceDate: "desc" },
+    include: { lineItems: true },
   });
 
   return (
@@ -111,7 +113,14 @@ export default async function InvoicesPage({
                 <td className="py-2 px-3 text-left">{invoice.billingType}</td>
                 <td className="py-2 px-3 text-left">
                   {invoice.currency}{" "}
-                  {invoice.fixedPrice ? invoice.fixedPrice.toString() : "—"}
+                  {calculateInvoiceTotals({
+                    billingType: invoice.billingType,
+                    fixedPrice: invoice.fixedPrice
+                      ? Number(invoice.fixedPrice)
+                      : null,
+                    lineItems: invoice.lineItems,
+                    mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+                  }).grandTotal.toFixed(2)}
                 </td>
                 <td className="py-2 px-3 text-left">
                   <StatusBadge status={invoice.status} />
