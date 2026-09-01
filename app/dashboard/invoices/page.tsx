@@ -83,86 +83,114 @@ export default async function InvoicesPage({
       {invoices.length === 0 ? (
         <p className="text-gray-500">No invoices found.</p>
       ) : (
-        <table className="w-full text-sm border-collapse text-left">
-          <thead>
-            <tr className="text-left border-b">
-              <th className="py-2 px-3 text-left">Invoice #</th>
-              <th className="py-2 px-3 text-left">Client</th>
-              <th className="py-2 px-3 text-left">Date</th>
-              <th className="py-2 px-3 text-left">Due</th>
-              <th className="py-2 px-3 text-left">Type</th>
-              <th className="py-2 px-3 text-left">Amount</th>
-              <th className="py-2 px-3 text-left">Status</th>
-              <th className="py-2 px-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((invoice, index) => (
-              <tr
-                key={invoice.id}
-                className={index % 2 === 0 ? "bg-white" : "bg-green-50"}
-              >
-                <td className="py-2 px-3 text-left">{invoice.invoiceNumber}</td>
-                <td className="py-2 px-3 text-left">{invoice.clientName}</td>
-                <td className="py-2 px-3 text-left">
-                  {new Date(invoice.invoiceDate).toLocaleDateString()}
-                </td>
-                <td className="py-2 px-3 text-left">
-                  {new Date(invoice.dueDate).toLocaleDateString()}
-                </td>
-                <td className="py-2 px-3 text-left">{invoice.billingType}</td>
-                <td className="py-2 px-3 text-left">
-                  {invoice.currency}{" "}
-                  {calculateInvoiceTotals({
-                    billingType: invoice.billingType,
-                    fixedPrice: invoice.fixedPrice
-                      ? Number(invoice.fixedPrice)
-                      : null,
-                    lineItems: invoice.lineItems,
-                    mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                  }).grandTotal.toFixed(2)}
-                </td>
-                <td className="py-2 px-3 text-left">
-                  <StatusBadge status={invoice.status} />
-                </td>
-                <td className="py-2 px-3 text-left">
-                  <div className="flex gap-3">
-                    <Link
-                      href={`/dashboard/invoices/${invoice.id}`}
-                      className="text-gray-600 hover:text-teal-700"
-                      title="View"
-                    >
-                      <Eye
-                        className="text-green-600 cursor-pointer"
-                        size={16}
-                      />
-                    </Link>
-                    <Link
-                      href={`/dashboard/invoices/${invoice.id}/edit`}
-                      className="text-gray-600 hover:text-teal-700"
-                      title="Edit"
-                    >
-                      <Pencil
-                        className="text-yellow-500 cursor-pointer"
-                        size={16}
-                      />
-                    </Link>
-                    <a
-                      href={`/dashboard/invoices/${invoice.id}/pdf`}
-                      className="text-gray-600 hover:text-teal-700"
-                      title="Download PDF"
-                    >
-                      <FileDown
-                        className="text-red-700 cursor-pointer"
-                        size={16}
-                      />
-                    </a>
-                  </div>
-                </td>
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-[900px] text-sm border-collapse text-left">
+            <thead>
+              <tr className="text-left border-b">
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  Invoice #
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  Client
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">Date</th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">Due</th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">Type</th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  Amount
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  Status
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {invoices.map((invoice, index) => (
+                <tr
+                  key={invoice.id}
+                  className={index % 2 === 0 ? "bg-white" : "bg-green-50"}
+                >
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {invoice.invoiceNumber}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {invoice.clientName}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {new Date(invoice.invoiceDate).toLocaleDateString()}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {new Date(invoice.dueDate).toLocaleDateString()}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {invoice.billingType}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    {invoice.currency}{" "}
+                    {calculateInvoiceTotals({
+                      billingType: invoice.billingType,
+                      fixedPrice: invoice.fixedPrice
+                        ? Number(invoice.fixedPrice)
+                        : null,
+                      lineItems: invoice.lineItems,
+                      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+                    }).grandTotal.toFixed(2)}
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    <StatusBadge status={invoice.status} />
+                  </td>
+
+                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                    <div className="flex gap-3">
+                      <Link
+                        href={`/dashboard/invoices/${invoice.id}`}
+                        className="text-gray-600 hover:text-teal-700"
+                        title="View"
+                      >
+                        <Eye
+                          className="text-green-600 cursor-pointer"
+                          size={16}
+                        />
+                      </Link>
+
+                      <Link
+                        href={`/dashboard/invoices/${invoice.id}/edit`}
+                        className="text-gray-600 hover:text-teal-700"
+                        title="Edit"
+                      >
+                        <Pencil
+                          className="text-yellow-500 cursor-pointer"
+                          size={16}
+                        />
+                      </Link>
+
+                      <a
+                        href={`/dashboard/invoices/${invoice.id}/pdf`}
+                        className="text-gray-600 hover:text-teal-700"
+                        title="Download PDF"
+                      >
+                        <FileDown
+                          className="text-red-700 cursor-pointer"
+                          size={16}
+                        />
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Pagination placeholder — wired up properly once there's
