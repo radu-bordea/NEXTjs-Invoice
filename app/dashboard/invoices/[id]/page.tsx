@@ -57,13 +57,13 @@ export default async function InvoiceViewPage({
           <div className="flex gap-2">
             <Link
               href={`/dashboard/invoices/${invoice.id}/edit`}
-              className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg border-b text-sm hover:bg-gray-50 cursor-pointer"
             >
               Edit
             </Link>
             <Link
               href={`/dashboard/invoices/${invoice.id}/pdf`}
-              className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg border-b text-sm hover:bg-gray-50 cursor-pointer"
             >
               Download PDF
             </Link>
