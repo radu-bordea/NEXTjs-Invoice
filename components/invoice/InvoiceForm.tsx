@@ -3,8 +3,10 @@
 import { useActionState, useState } from "react"
 import {
   createInvoice,
+  updateInvoice,
   type CreateInvoiceState,
 } from "@/actions/invoice.actions"
+import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
 
 type LineItemRow = {
   date: string
@@ -17,14 +19,51 @@ const emptyRow: LineItemRow = { date: "", description: "", hours: "", rate: "" }
 
 const initialState: CreateInvoiceState = { success: false }
 
-export function InvoiceForm() {
-  const [state, formAction, isPending] = useActionState(
-    createInvoice,
-    initialState
-  )
+/**
+ * Converts Prisma's typed WorkLogItem rows (Decimal, Date) into the
+ * plain-string shape this form's local state uses for controlled
+ * inputs — the inverse of what happens when the form serializes
+ * lineItems to JSON before submitting.
+ */
+function toLineItemRows(items: WorkLogItem[]): LineItemRow[] {
+  return items.map((item) => ({
+    date: new Date(item.date).toISOString().split("T")[0],
+    description: item.description,
+    hours: item.hours.toString(),
+    rate: item.rate.toString(),
+  }))
+}
 
-  const [billingType, setBillingType] = useState<"HOURLY" | "FIXED">("HOURLY")
-  const [lineItems, setLineItems] = useState<LineItemRow[]>([{ ...emptyRow }])
+/**
+ * Invoice form for both creating and editing. Pass `invoice` to
+ * pre-fill and switch into edit mode (calls `updateInvoice` bound
+ * to that invoice's id); omit it for the create flow.
+ */
+export function InvoiceForm({
+  invoice,
+}: {
+  invoice?: Invoice & { lineItems: WorkLogItem[] }
+}) {
+  const isEditMode = Boolean(invoice)
+
+  // In edit mode, bind the invoice's id as the first argument so
+  // the resulting function matches useActionState's required
+  // (prevState, formData) signature — updateInvoice itself takes
+  // three arguments, but bind() locks in invoiceId ahead of time.
+  const action = isEditMode
+    ? updateInvoice.bind(null, invoice!.id)
+    : createInvoice
+
+  const [state, formAction, isPending] = useActionState(action, initialState)
+
+  const [billingType, setBillingType] = useState<"HOURLY" | "FIXED">(
+    invoice?.billingType ?? "HOURLY"
+  )
+  const [lineItems, setLineItems] = useState<LineItemRow[]>(
+    invoice?.lineItems && invoice.lineItems.length > 0
+      ? toLineItemRows(invoice.lineItems)
+      : [{ ...emptyRow }]
+  )
 
   function addRow() {
     setLineItems((rows) => [...rows, { ...emptyRow }])
@@ -54,7 +93,7 @@ export function InvoiceForm() {
           <button
             type="button"
             onClick={() => setBillingType("HOURLY")}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border cursor-pointer ${
               billingType === "HOURLY"
                 ? "bg-teal-700 text-white border-teal-700"
                 : "border-gray-300"
@@ -65,7 +104,7 @@ export function InvoiceForm() {
           <button
             type="button"
             onClick={() => setBillingType("FIXED")}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border cursor-pointer ${
               billingType === "FIXED"
                 ? "bg-teal-700 text-white border-teal-700"
                 : "border-gray-300"
@@ -83,27 +122,27 @@ export function InvoiceForm() {
           label="Client name"
           name="clientName"
           required
-          defaultValue={state.submittedValues?.clientName}
+          defaultValue={state.submittedValues?.clientName ?? invoice?.clientName}
           error={state.errors?.clientName}
         />
         <Field
           label="Org.nr"
           name="clientOrgNr"
-          defaultValue={state.submittedValues?.clientOrgNr}
+          defaultValue={state.submittedValues?.clientOrgNr ?? invoice?.clientOrgNr ?? ""}
           error={state.errors?.clientOrgNr}
         />
         <Field
           label="Address"
           name="clientAddress"
           required
-          defaultValue={state.submittedValues?.clientAddress}
+          defaultValue={state.submittedValues?.clientAddress ?? invoice?.clientAddress}
           error={state.errors?.clientAddress}
         />
         <Field
           label="Email"
           name="clientEmail"
           type="email"
-          defaultValue={state.submittedValues?.clientEmail}
+          defaultValue={state.submittedValues?.clientEmail ?? invoice?.clientEmail ?? ""}
           error={state.errors?.clientEmail}
         />
       </fieldset>
@@ -115,7 +154,10 @@ export function InvoiceForm() {
           name="invoiceDate"
           type="date"
           required
-          defaultValue={state.submittedValues?.invoiceDate}
+          defaultValue={
+            state.submittedValues?.invoiceDate ??
+            (invoice ? new Date(invoice.invoiceDate).toISOString().split("T")[0] : "")
+          }
           error={state.errors?.invoiceDate}
         />
         <Field
@@ -123,34 +165,47 @@ export function InvoiceForm() {
           name="dueDate"
           type="date"
           required
-          defaultValue={state.submittedValues?.dueDate}
+          defaultValue={
+            state.submittedValues?.dueDate ??
+            (invoice ? new Date(invoice.dueDate).toISOString().split("T")[0] : "")
+          }
           error={state.errors?.dueDate}
         />
         <Field
           label="Period start"
           name="periodStart"
           type="date"
-          defaultValue={state.submittedValues?.periodStart}
+          defaultValue={
+            state.submittedValues?.periodStart ??
+            (invoice?.periodStart
+              ? new Date(invoice.periodStart).toISOString().split("T")[0]
+              : "")
+          }
           error={state.errors?.periodStart}
         />
         <Field
           label="Period end"
           name="periodEnd"
           type="date"
-          defaultValue={state.submittedValues?.periodEnd}
+          defaultValue={
+            state.submittedValues?.periodEnd ??
+            (invoice?.periodEnd
+              ? new Date(invoice.periodEnd).toISOString().split("T")[0]
+              : "")
+          }
           error={state.errors?.periodEnd}
         />
         <Field
           label="Project reference"
           name="projectRef"
-          defaultValue={state.submittedValues?.projectRef}
+          defaultValue={state.submittedValues?.projectRef ?? invoice?.projectRef ?? ""}
           error={state.errors?.projectRef}
         />
         <div>
           <label className="block text-sm font-medium mb-1">Currency</label>
           <select
             name="currency"
-            defaultValue={state.submittedValues?.currency ?? "NOK"}
+            defaultValue={state.submittedValues?.currency ?? invoice?.currency ?? "NOK"}
             className="w-full px-4 py-2 border rounded-lg"
           >
             <option value="NOK">NOK</option>
@@ -200,7 +255,7 @@ export function InvoiceForm() {
               <button
                 type="button"
                 onClick={() => removeRow(index)}
-                className="text-red-600 text-sm px-2 py-2"
+                className="text-red-600 text-sm px-2 py-2 cursor-pointer"
                 aria-label="Remove row"
               >
                 ✕
@@ -211,7 +266,7 @@ export function InvoiceForm() {
           <button
             type="button"
             onClick={addRow}
-            className="text-sm text-teal-700 font-medium"
+            className="text-sm text-teal-700 font-medium cursor-pointer"
           >
             + Add row
           </button>
@@ -236,7 +291,10 @@ export function InvoiceForm() {
             name="fixedPrice"
             type="number"
             required
-            defaultValue={state.submittedValues?.fixedPrice}
+            defaultValue={
+              state.submittedValues?.fixedPrice ??
+              (invoice?.fixedPrice ? invoice.fixedPrice.toString() : "")
+            }
             error={state.errors?.fixedPrice}
           />
         </fieldset>
@@ -251,19 +309,14 @@ export function InvoiceForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50"
+        className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
       >
-        {isPending ? "Creating..." : "Create invoice"}
+        {isPending ? "Saving..." : isEditMode ? "Save changes" : "Create invoice"}
       </button>
     </form>
   )
 }
 
-/**
- * Reusable labeled input with inline error display and an
- * asterisk next to the label when the field is required, so the
- * user knows before submitting — not only after a failed validation.
- */
 function Field({
   label,
   name,

@@ -7,6 +7,7 @@
 - npm install -D prisma
 - npm install @react-pdf/renderer
 - npm install lucide-react
+- npm install sonner
 
 # files
 - find app -type f
@@ -16,3 +17,7 @@
 - npx prisma init
 - npx prisma db push
 - npx prisma generate
+
+
+# test
+- npm run build && npm run start

@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { StatusButtons } from "@/components/invoice/StatusButtons";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
-
+import { ViewNotice } from "@/components/invoice/ViewNotice";
+import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
 /**
  * Read-only invoice detail page. Confirms the invoice belongs to
@@ -34,39 +35,18 @@ export default async function InvoiceViewPage({
     notFound();
   }
 
-  const mvaRate = 0.25;
-
-  // Split line items into "before registration" (no VAT) and
-  // "after registration" (VAT applies), based on each item's own
-  // date compared against the invoice's snapshotted registration
-  // date. If mvaRegisteredFrom is null, nothing is taxed.
-  const beforeItems = invoice.lineItems.filter(
-    (item) =>
-      !invoice.mvaRegisteredFrom || item.date < invoice.mvaRegisteredFrom,
-  );
-  const afterItems = invoice.lineItems.filter(
-    (item) =>
-      invoice.mvaRegisteredFrom && item.date >= invoice.mvaRegisteredFrom,
-  );
-
-  const subtotalBefore = beforeItems.reduce(
-    (sum, item) => sum + Number(item.hours) * Number(item.rate),
-    0,
-  );
-  const subtotalAfter = afterItems.reduce(
-    (sum, item) => sum + Number(item.hours) * Number(item.rate),
-    0,
-  );
-  const vatAmount = subtotalAfter * mvaRate;
-
-  const hourlySubtotal = subtotalBefore + subtotalAfter;
-  const grandTotal =
-    invoice.billingType === "FIXED"
-      ? Number(invoice.fixedPrice ?? 0)
-      : hourlySubtotal + vatAmount;
+  const { subtotalBefore, subtotalAfter, vatAmount, grandTotal } =
+    calculateInvoiceTotals({
+      billingType: invoice.billingType,
+      fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
+      lineItems: invoice.lineItems,
+      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+    });
 
   return (
     <main className="max-w-3xl mx-auto p-8">
+      // inside the return, as the first element:
+      <ViewNotice />
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-bold">
@@ -89,9 +69,7 @@ export default async function InvoiceViewPage({
           </a>
         </div>
       </div>
-
       <StatusButtons invoiceId={invoice.id} currentStatus={invoice.status} />
-
       <div className="rounded-lg border p-6 space-y-6 mt-6">
         {/* Issuer / client */}
         <div className="grid grid-cols-2 gap-6">
@@ -236,5 +214,3 @@ export default async function InvoiceViewPage({
     </main>
   );
 }
-
-

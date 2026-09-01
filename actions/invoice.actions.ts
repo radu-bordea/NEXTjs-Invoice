@@ -216,3 +216,133 @@ export async function updateInvoiceStatus(
   revalidatePath(`/dashboard/invoices/${invoiceId}`)
   revalidatePath("/dashboard/invoices")
 }
+
+/**
+ * Updates an existing DRAFT invoice for the logged-in user.
+ *
+ * Confirms ownership and that the invoice is still in DRAFT status
+ * before allowing changes — once SENT or PAID, an invoice is a
+ * record the client may have already seen, so it shouldn't be
+ * silently altered.
+ *
+ * Line items are replaced wholesale (delete all, then recreate)
+ * rather than diffed individually — simpler and reliable since
+ * line items have no stable identity the user tracks across edits.
+ *
+ * @param invoiceId - the invoice being edited
+ * @param _prevState - previous action state (useActionState convention)
+ * @param formData - submitted form fields, same shape as createInvoice
+ */
+export async function updateInvoice(
+  invoiceId: string,
+  _prevState: CreateInvoiceState,
+  formData: FormData
+): Promise<CreateInvoiceState> {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
+
+  const existingInvoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+  })
+
+  if (!existingInvoice || existingInvoice.userId !== userId) {
+    return { success: false, message: "Invoice not found." }
+  }
+
+  if (existingInvoice.status !== "DRAFT") {
+    return {
+      success: false,
+      message: "Only draft invoices can be edited.",
+    }
+  }
+
+  const lineItemsRaw = formData.get("lineItems")
+  let lineItems: unknown[] = []
+  if (typeof lineItemsRaw === "string" && lineItemsRaw.length > 0) {
+    try {
+      lineItems = JSON.parse(lineItemsRaw)
+    } catch {
+      return { success: false, message: "Invalid line items data." }
+    }
+  }
+
+  const raw = {
+    invoiceDate: formData.get("invoiceDate"),
+    dueDate: formData.get("dueDate"),
+    periodStart: formData.get("periodStart") || undefined,
+    periodEnd: formData.get("periodEnd") || undefined,
+    projectRef: formData.get("projectRef") || undefined,
+    clientName: formData.get("clientName"),
+    clientOrgNr: formData.get("clientOrgNr") || undefined,
+    clientAddress: formData.get("clientAddress"),
+    clientEmail: formData.get("clientEmail") || "",
+    billingType: formData.get("billingType"),
+    fixedPrice: formData.get("fixedPrice") || undefined,
+    currency: formData.get("currency") || "NOK",
+    lineItems,
+    // Keep the existing invoice number — it's immutable once
+    // assigned, never regenerated on edit.
+    invoiceNumber: existingInvoice.invoiceNumber,
+  }
+
+  const parsed = invoiceSchema.safeParse(raw)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      errors: z.flattenError(parsed.error).fieldErrors,
+      message: "Please fix the errors below.",
+      submittedValues: {
+        clientName: String(raw.clientName ?? ""),
+        clientOrgNr: String(raw.clientOrgNr ?? ""),
+        clientAddress: String(raw.clientAddress ?? ""),
+        clientEmail: String(raw.clientEmail ?? ""),
+        invoiceDate: String(raw.invoiceDate ?? ""),
+        dueDate: String(raw.dueDate ?? ""),
+        periodStart: String(raw.periodStart ?? ""),
+        periodEnd: String(raw.periodEnd ?? ""),
+        projectRef: String(raw.projectRef ?? ""),
+        currency: String(raw.currency ?? "NOK"),
+        fixedPrice: String(raw.fixedPrice ?? ""),
+      },
+    }
+  }
+
+  const data = parsed.data
+
+  await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      invoiceDate: new Date(data.invoiceDate),
+      dueDate: new Date(data.dueDate),
+      periodStart: data.periodStart ? new Date(data.periodStart) : null,
+      periodEnd: data.periodEnd ? new Date(data.periodEnd) : null,
+      projectRef: data.projectRef || null,
+
+      clientName: data.clientName,
+      clientOrgNr: data.clientOrgNr || null,
+      clientAddress: data.clientAddress,
+      clientEmail: data.clientEmail || null,
+
+      billingType: data.billingType,
+      fixedPrice: data.fixedPrice ?? null,
+      currency: data.currency,
+
+      // Delete-then-recreate: the simplest reliable way to sync a
+      // related array in Prisma without diffing individual rows.
+      lineItems: {
+        deleteMany: {},
+        create: data.lineItems?.map((item) => ({
+          date: new Date(item.date),
+          description: item.description,
+          hours: item.hours,
+          rate: item.rate,
+        })),
+      },
+    },
+  })
+
+  revalidatePath(`/dashboard/invoices/${invoiceId}`)
+  revalidatePath("/dashboard/invoices")
+  redirect(`/dashboard/invoices/${invoiceId}`)
+}
