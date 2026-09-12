@@ -105,12 +105,15 @@ export function InvoicePDF({
       fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
       lineItems: invoice.lineItems,
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+      invoiceDate: invoice.invoiceDate,
     })
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>INVOICE: {invoice.projectRef} - {invoice.invoiceNumber}</Text>
+        <Text style={styles.title}>
+          INVOICE: {invoice.projectRef} - {invoice.invoiceNumber}
+        </Text>
         <View style={styles.divider} />
 
         {/* Issuer / client */}
@@ -196,29 +199,33 @@ export function InvoicePDF({
 
         <View style={styles.divider} />
 
-        {/* Totals, including MVA breakdown */}
+        {/* Totals, including MVA breakdown — applies to both
+            HOURLY and FIXED invoices now, since the calculation
+            helper handles both cases correctly. */}
         <View style={styles.totalsSection}>
-          {invoice.billingType === "HOURLY" && invoice.mvaRegisteredFrom && (
-            <>
-              {subtotalBefore > 0 && (
+          {invoice.mvaRegisteredFrom &&
+            (subtotalBefore > 0 || subtotalAfter > 0) && (
+              <>
+                {subtotalBefore > 0 && (
+                  <Text>
+                    Work before registration of 25% VAT — {invoice.currency}{" "}
+                    {subtotalBefore.toFixed(2)} (over 50,000 NOK must be
+                    taxed)
+                  </Text>
+                )}
+                {subtotalAfter > 0 && (
+                  <Text>
+                    Work after registration of 25% VAT — {invoice.currency}{" "}
+                    {subtotalAfter.toFixed(2)}
+                  </Text>
+                )}
                 <Text>
-                  Work before registration of 25% VAT — {invoice.currency}{" "}
-                  {subtotalBefore.toFixed(2)} (over 50,000 NOK must be taxed)
+                  25% VAT = {invoice.currency} {vatAmount.toFixed(2)}
                 </Text>
-              )}
-              {subtotalAfter > 0 && (
-                <Text>
-                  Work after registration of 25% VAT — {invoice.currency}{" "}
-                  {subtotalAfter.toFixed(2)}
-                </Text>
-              )}
-              <Text>
-                25% VAT = {invoice.currency} {vatAmount.toFixed(2)}
-              </Text>
-            </>
-          )}
+              </>
+            )}
 
-          {invoice.billingType === "HOURLY" && !invoice.mvaRegisteredFrom && (
+          {!invoice.mvaRegisteredFrom && (
             <Text style={styles.italic}>
               This invoice does NOT include VAT (MVA). VAT registration will
               be added once revenue exceeds NOK 50,000 in a 12-month period.

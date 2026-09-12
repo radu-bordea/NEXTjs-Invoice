@@ -143,6 +143,7 @@ export default async function InvoicesPage({
                         : null,
                       lineItems: invoice.lineItems,
                       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+                      invoiceDate: invoice.invoiceDate,
                     }).grandTotal.toFixed(2)}
                   </td>
 
