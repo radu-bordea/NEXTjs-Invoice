@@ -8,6 +8,7 @@
 - npm install @react-pdf/renderer
 - npm install lucide-react
 - npm install sonner
+- npm install recharts
 
 # files
 - find app -type f
