@@ -76,3 +76,42 @@ export function summarizeYear(monthly: MonthlyReport[]) {
     { billedTotal: 0, paidTotal: 0, vatCollected: 0 }
   )
 }
+
+
+/**
+ * Norway's standard MVA filing periods — six bi-monthly terms per
+ * year, matching Skatteetaten's actual reporting schedule (not
+ * arbitrary calendar months). Each period is defined by its
+ * starting and ending month (1-12, inclusive).
+ */
+export const MVA_PERIODS = [
+  { id: "jan-feb", label: "Jan–Feb", startMonth: 1, endMonth: 2 },
+  { id: "mar-apr", label: "Mar–Apr", startMonth: 3, endMonth: 4 },
+  { id: "may-jun", label: "May–Jun", startMonth: 5, endMonth: 6 },
+  { id: "jul-aug", label: "Jul–Aug", startMonth: 7, endMonth: 8 },
+  { id: "sep-oct", label: "Sep–Oct", startMonth: 9, endMonth: 10 },
+  { id: "nov-dec", label: "Nov–Dec", startMonth: 11, endMonth: 12 },
+] as const
+
+export type MvaPeriodId = (typeof MVA_PERIODS)[number]["id"]
+
+/**
+ * Finds a period definition by its id, or returns undefined if the
+ * id doesn't match any known period (e.g. bad/missing query param).
+ */
+export function getMvaPeriod(id: string | undefined) {
+  return MVA_PERIODS.find((p) => p.id === id)
+}
+
+/**
+ * Builds the inclusive start/end Date range for a given period and
+ * year — used directly in the Prisma query's invoiceDate filter.
+ */
+export function getPeriodDateRange(year: number, period: (typeof MVA_PERIODS)[number]) {
+  const start = new Date(year, period.startMonth - 1, 1)
+  // First day of the month AFTER the period ends — used with `lt`
+  // (less than) in the Prisma query, so it correctly includes the
+  // entire last day of the period's final month.
+  const end = new Date(year, period.endMonth, 1)
+  return { start, end }
+}

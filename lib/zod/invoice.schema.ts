@@ -32,7 +32,7 @@ const baseInvoiceSchema = z.object({
 
   billingType: z.enum(["HOURLY", "FIXED"]),
   fixedPrice: z.coerce.number().positive().optional(),
-  currency: z.enum(["NOK", "EUR", "USD"]).default("NOK"),
+  currency: z.literal("NOK").default("NOK"),
 
   lineItems: z.array(workLogItemSchema).optional(),
 })

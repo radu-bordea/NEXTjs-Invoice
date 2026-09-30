@@ -1,11 +1,11 @@
-"use server"
+"use server";
 
-import { auth } from "@clerk/nextjs/server"
-import prisma from "@/lib/prisma"
-import { invoiceSchema } from "@/lib/zod/invoice.schema"
-import { z } from "zod"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
+import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
+import { invoiceSchema } from "@/lib/zod/invoice.schema";
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 /**
  * Shape of the object returned by `createInvoice`.
@@ -13,11 +13,11 @@ import { redirect } from "next/navigation"
  * SaveCompanyProfileState.
  */
 export type CreateInvoiceState = {
-  success: boolean
-  errors?: Record<string, string[] | undefined>
-  message?: string
-  submittedValues?: Record<string, string>
-}
+  success: boolean;
+  errors?: Record<string, string[] | undefined>;
+  message?: string;
+  submittedValues?: Record<string, string>;
+};
 
 /**
  * Generates the next invoice number for the current user, scoped
@@ -27,7 +27,7 @@ export type CreateInvoiceState = {
  * increments it. Starts fresh at "-01" each new year.
  */
 async function getNextInvoiceNumber(userId: string): Promise<string> {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   const lastInvoice = await prisma.invoice.findFirst({
     where: {
@@ -35,16 +35,16 @@ async function getNextInvoiceNumber(userId: string): Promise<string> {
       invoiceNumber: { startsWith: `${currentYear}-` },
     },
     orderBy: { invoiceNumber: "desc" },
-  })
+  });
 
   if (!lastInvoice) {
-    return `${currentYear}-01`
+    return `${currentYear}-01`;
   }
 
-  const lastSequence = parseInt(lastInvoice.invoiceNumber.split("-")[1], 10)
-  const nextSequence = (lastSequence + 1).toString().padStart(2, "0")
+  const lastSequence = parseInt(lastInvoice.invoiceNumber.split("-")[1], 10);
+  const nextSequence = (lastSequence + 1).toString().padStart(2, "0");
 
-  return `${currentYear}-${nextSequence}`
+  return `${currentYear}-${nextSequence}`;
 }
 
 /**
@@ -65,32 +65,33 @@ async function getNextInvoiceNumber(userId: string): Promise<string> {
  */
 export async function createInvoice(
   _prevState: CreateInvoiceState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CreateInvoiceState> {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
   const companyProfile = await prisma.companyProfile.findUnique({
     where: { userId },
-  })
+  });
 
   if (!companyProfile) {
     return {
       success: false,
-      message: "Please complete your company profile before creating an invoice.",
-    }
+      message:
+        "Please complete your company profile before creating an invoice.",
+    };
   }
 
-  const lineItemsRaw = formData.get("lineItems")
-  let lineItems: unknown[] = []
+  const lineItemsRaw = formData.get("lineItems");
+  let lineItems: unknown[] = [];
   if (typeof lineItemsRaw === "string" && lineItemsRaw.length > 0) {
     try {
-      lineItems = JSON.parse(lineItemsRaw)
+      lineItems = JSON.parse(lineItemsRaw);
     } catch {
       return {
         success: false,
         message: "Invalid line items data.",
-      }
+      };
     }
   }
 
@@ -112,9 +113,9 @@ export async function createInvoice(
     // by the form — placeholder here just so the schema has
     // something to validate against before we overwrite it.
     invoiceNumber: "pending",
-  }
+  };
 
-  const parsed = invoiceSchema.safeParse(raw)
+  const parsed = invoiceSchema.safeParse(raw);
 
   if (!parsed.success) {
     return {
@@ -134,11 +135,11 @@ export async function createInvoice(
         currency: String(raw.currency ?? "NOK"),
         fixedPrice: String(raw.fixedPrice ?? ""),
       },
-    }
+    };
   }
 
-  const data = parsed.data
-  const invoiceNumber = await getNextInvoiceNumber(userId)
+  const data = parsed.data;
+  const invoiceNumber = await getNextInvoiceNumber(userId);
 
   await prisma.invoice.create({
     data: {
@@ -182,10 +183,10 @@ export async function createInvoice(
         })),
       },
     },
-  })
+  });
 
-  revalidatePath("/dashboard/invoices")
-  redirect("/dashboard/invoices")
+  revalidatePath("/dashboard/invoices");
+  redirect("/dashboard/invoices");
 }
 
 /**
@@ -195,26 +196,26 @@ export async function createInvoice(
  */
 export async function updateInvoiceStatus(
   invoiceId: string,
-  newStatus: "DRAFT" | "SENT" | "PAID"
+  newStatus: "DRAFT" | "SENT" | "PAID",
 ) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
   const invoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
-  })
+  });
 
   if (!invoice || invoice.userId !== userId) {
-    throw new Error("Invoice not found")
+    throw new Error("Invoice not found");
   }
 
   await prisma.invoice.update({
     where: { id: invoiceId },
     data: { status: newStatus },
-  })
+  });
 
-  revalidatePath(`/dashboard/invoices/${invoiceId}`)
-  revalidatePath("/dashboard/invoices")
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  revalidatePath("/dashboard/invoices");
 }
 
 /**
@@ -236,33 +237,33 @@ export async function updateInvoiceStatus(
 export async function updateInvoice(
   invoiceId: string,
   _prevState: CreateInvoiceState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CreateInvoiceState> {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
   const existingInvoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
-  })
+  });
 
   if (!existingInvoice || existingInvoice.userId !== userId) {
-    return { success: false, message: "Invoice not found." }
+    return { success: false, message: "Invoice not found." };
   }
 
   if (existingInvoice.status !== "DRAFT") {
     return {
       success: false,
       message: "Only draft invoices can be edited.",
-    }
+    };
   }
 
-  const lineItemsRaw = formData.get("lineItems")
-  let lineItems: unknown[] = []
+  const lineItemsRaw = formData.get("lineItems");
+  let lineItems: unknown[] = [];
   if (typeof lineItemsRaw === "string" && lineItemsRaw.length > 0) {
     try {
-      lineItems = JSON.parse(lineItemsRaw)
+      lineItems = JSON.parse(lineItemsRaw);
     } catch {
-      return { success: false, message: "Invalid line items data." }
+      return { success: false, message: "Invalid line items data." };
     }
   }
 
@@ -283,9 +284,9 @@ export async function updateInvoice(
     // Keep the existing invoice number — it's immutable once
     // assigned, never regenerated on edit.
     invoiceNumber: existingInvoice.invoiceNumber,
-  }
+  };
 
-  const parsed = invoiceSchema.safeParse(raw)
+  const parsed = invoiceSchema.safeParse(raw);
 
   if (!parsed.success) {
     return {
@@ -305,10 +306,10 @@ export async function updateInvoice(
         currency: String(raw.currency ?? "NOK"),
         fixedPrice: String(raw.fixedPrice ?? ""),
       },
-    }
+    };
   }
 
-  const data = parsed.data
+  const data = parsed.data;
 
   await prisma.invoice.update({
     where: { id: invoiceId },
@@ -340,9 +341,50 @@ export async function updateInvoice(
         })),
       },
     },
-  })
+  });
 
-  revalidatePath(`/dashboard/invoices/${invoiceId}`)
-  revalidatePath("/dashboard/invoices")
-  redirect(`/dashboard/invoices/${invoiceId}`)
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  revalidatePath("/dashboard/invoices");
+  redirect(`/dashboard/invoices/${invoiceId}`);
+}
+
+/**
+ * Returns the logged-in user's distinct past clients, most
+ * recently used first. Powers the client-prefill autocomplete on
+ * the invoice form — picking one fills in name, org.nr, address,
+ * and email from whichever invoice for that client was created
+ * most recently.
+ */
+export async function getRecentClients() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const invoices = await prisma.invoice.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      clientName: true,
+      clientOrgNr: true,
+      clientAddress: true,
+      clientEmail: true,
+      billingType: true,
+      currency: true,
+      projectRef: true,
+    },
+  });
+
+  // Keep only the most recent invoice per distinct client name —
+  // dedupe manually since Prisma's `distinct` only keeps the first
+  // row per group in creation order, which orderBy already gives us.
+  const seen = new Set<string>();
+  const distinctClients = [];
+
+  for (const invoice of invoices) {
+    if (!seen.has(invoice.clientName)) {
+      seen.add(invoice.clientName);
+      distinctClients.push(invoice);
+    }
+  }
+  
+  return distinctClients;
 }

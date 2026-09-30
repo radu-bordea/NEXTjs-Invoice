@@ -7,6 +7,7 @@ import {
   type CreateInvoiceState,
 } from "@/actions/invoice.actions";
 import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client";
+import { ClientPicker } from "./ClientPicker";
 
 type LineItemRow = {
   date: string;
@@ -64,6 +65,14 @@ export function InvoiceForm({
   const [billingType, setBillingType] = useState<"HOURLY" | "FIXED">(
     invoice?.billingType ?? "HOURLY",
   );
+
+  const [clientFields, setClientFields] = useState({
+    clientName: invoice?.clientName ?? "",
+    clientOrgNr: invoice?.clientOrgNr ?? "",
+    clientAddress: invoice?.clientAddress ?? "",
+    clientEmail: invoice?.clientEmail ?? "",
+  });
+
   const [lineItems, setLineItems] = useState<LineItemRow[]>(
     invoice?.lineItems && invoice.lineItems.length > 0
       ? toLineItemRows(invoice.lineItems)
@@ -121,43 +130,89 @@ export function InvoiceForm({
         <input type="hidden" name="billingType" value={billingType} />
       </div>
 
+      {!isEditMode && (
+        <ClientPicker
+          onSelect={(client) => {
+            setClientFields(
+              client
+                ? {
+                    clientName: client.clientName,
+                    clientOrgNr: client.clientOrgNr ?? "",
+                    clientAddress: client.clientAddress,
+                    clientEmail: client.clientEmail ?? "",
+                  }
+                : {
+                    clientName: "",
+                    clientOrgNr: "",
+                    clientAddress: "",
+                    clientEmail: "",
+                  },
+            );
+          }}
+        />
+      )}
+
       <fieldset className="space-y-4 border rounded-lg p-4">
         <legend className="text-sm font-medium px-1">Client</legend>
-        <Field
-          label="Client name"
-          name="clientName"
-          required
-          defaultValue={
-            state.submittedValues?.clientName ?? invoice?.clientName
-          }
-          error={state.errors?.clientName}
-        />
-        <Field
-          label="Org.nr"
-          name="clientOrgNr"
-          defaultValue={
-            state.submittedValues?.clientOrgNr ?? invoice?.clientOrgNr ?? ""
-          }
-          error={state.errors?.clientOrgNr}
-        />
-        <Field
-          label="Address"
-          name="clientAddress"
-          required
-          defaultValue={
-            state.submittedValues?.clientAddress ?? invoice?.clientAddress
-          }
-          error={state.errors?.clientAddress}
-        />
-        <Field
-          label="Email"
-          name="clientEmail"
-          type="email"
-          defaultValue={
-            state.submittedValues?.clientEmail ?? invoice?.clientEmail ?? ""
-          }
-          error={state.errors?.clientEmail}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Client name<span className="text-red-600 ml-0.5">*</span>
+          </label>
+          <input
+            name="clientName"
+            value={clientFields.clientName}
+            onChange={(e) =>
+              setClientFields((f) => ({ ...f, clientName: e.target.value }))
+            }
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+          {state.errors?.clientName && (
+            <p className="text-sm text-red-600 mt-1">
+              {state.errors.clientName[0]}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Org.nr</label>
+          <input
+            name="clientOrgNr"
+            value={clientFields.clientOrgNr}
+            onChange={(e) =>
+              setClientFields((f) => ({ ...f, clientOrgNr: e.target.value }))
+            }
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Address<span className="text-red-600 ml-0.5">*</span>
+          </label>
+          <input
+            name="clientAddress"
+            value={clientFields.clientAddress}
+            onChange={(e) =>
+              setClientFields((f) => ({ ...f, clientAddress: e.target.value }))
+            }
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+          {state.errors?.clientAddress && (
+            <p className="text-sm text-red-600 mt-1">
+              {state.errors.clientAddress[0]}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            name="clientEmail"
+            type="email"
+            value={clientFields.clientEmail}
+            onChange={(e) =>
+              setClientFields((f) => ({ ...f, clientEmail: e.target.value }))
+            }
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
       </fieldset>
 
       <fieldset className="space-y-4 border rounded-lg p-4">
@@ -220,20 +275,7 @@ export function InvoiceForm({
           }
           error={state.errors?.projectRef}
         />
-        <div>
-          <label className="block text-sm font-medium mb-1">Currency</label>
-          <select
-            name="currency"
-            defaultValue={
-              state.submittedValues?.currency ?? invoice?.currency ?? "NOK"
-            }
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="NOK">NOK</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-          </select>
-        </div>
+        <input type="hidden" name="currency" value="NOK" />
       </fieldset>
 
       {billingType === "HOURLY" && (

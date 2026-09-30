@@ -55,7 +55,6 @@ export function CompanyProfileForm({
                 : "Not registered"
             }
           />
-          <ViewRow label="Default currency" value={profile.defaultCurrency} />
           <ViewRow
             label="IBAN / account number"
             value={profile.ibanOrAccount}
@@ -125,24 +124,7 @@ export function CompanyProfileForm({
         error={state.errors?.mvaRegisteredFrom}
       />
 
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Default currency
-        </label>
-        <select
-          name="defaultCurrency"
-          defaultValue={
-            state.submittedValues?.defaultCurrency ??
-            profile?.defaultCurrency ??
-            "NOK"
-          }
-          className="w-full px-4 py-2 border rounded-lg"
-        >
-          <option value="NOK">NOK</option>
-          <option value="EUR">EUR</option>
-          <option value="USD">USD</option>
-        </select>
-      </div>
+      <input type="hidden" name="defaultCurrency" value="NOK" />
 
       <Field
         label="IBAN / account number"

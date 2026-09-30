@@ -13,7 +13,7 @@ export const companyProfileSchema = z.object({
     ),
   email: z.email("Invalid email address"),
   mvaRegisteredFrom: z.string().optional().nullable(),
-  defaultCurrency: z.enum(["NOK", "EUR", "USD"]).default("NOK"),
+  defaultCurrency: z.literal("NOK").default("NOK"),
   ibanOrAccount: z.string().min(1, "IBAN or account number is required"),
   bic: z.string().optional(),
   bankName: z.string().min(1, "Bank name is required"),
