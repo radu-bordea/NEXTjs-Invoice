@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 export default function HomePage() {
   return (
     <main className="flex flex-col flex-1">
@@ -11,12 +13,12 @@ export default function HomePage() {
           no Google Docs templates.
         </p>
 
-        <a
+        <Link
           href="/dashboard/invoices"
           className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors"
         >
           Go to Dashboard
-        </a>
+        </Link>
     </section><section className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto px-8 pb-24">
         <div className="text-center">
           <h3 className="font-semibold text-lg mb-2">Built for Norway</h3>

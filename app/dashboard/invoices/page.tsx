@@ -175,7 +175,7 @@ export default async function InvoicesPage({
                         />
                       </Link>
 
-                      <a
+                      <Link
                         href={`/dashboard/invoices/${invoice.id}/pdf`}
                         className="text-gray-600 hover:text-teal-700"
                         title="Download PDF"
@@ -184,7 +184,7 @@ export default async function InvoicesPage({
                           className="text-red-700 cursor-pointer"
                           size={16}
                         />
-                      </a>
+                      </Link>
                     </div>
                   </td>
                 </tr>

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default async function DashboardLayout({
   children,
@@ -14,18 +15,18 @@ export default async function DashboardLayout({
     <>
       <header className="flex justify-between items-center px-6 h-16 border-b border-zinc-200">
         <nav className="flex gap-6 font-medium text-sm">
-          <a
+          <Link
             href="/dashboard/settings"
             className="hover:text-purple-700 border-r border-zinc-200 pr-6"
           >
             Company Profile
-          </a>
-          <a href="/dashboard/invoices" className="hover:text-purple-700">
+          </Link>
+          <Link href="/dashboard/invoices" className="hover:text-purple-700">
             Invoices
-          </a>
-          <a href="/dashboard/reports" className="hover:text-teal-700">
+          </Link>
+          <Link href="/dashboard/reports" className="hover:text-teal-700">
             Reports
-          </a>
+          </Link>
         </nav>
         <UserButton />
       </header>

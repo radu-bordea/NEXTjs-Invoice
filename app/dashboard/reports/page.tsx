@@ -8,6 +8,7 @@ import {
   getPeriodDateRange,
 } from "@/lib/invoice-reports";
 import { RevenueChart } from "@/components/reports/RevenueChart";
+import Link from "next/link";
 
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
@@ -233,13 +234,13 @@ export default async function ReportsPage({
           </div>
         )}
 
-        <a
+        <Link
           href={pdfHref}
           download={`report-${selectedPeriod ? selectedPeriod.id : "year-" + year}.pdf`}
           className="inline-block bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors cursor-pointer"
         >
           Download PDF
-        </a>
+        </Link>
       </div>
     </main>
   );
@@ -298,9 +299,9 @@ function YearLink({
     : "px-3 py-1.5 rounded-full text-sm border cursor-pointer border-gray-300 text-gray-700 hover:bg-gray-50";
 
   return (
-    <a href={href} className={linkClass}>
+    <Link href={href} className={linkClass}>
       {year}
-    </a>
+    </Link>
   );
 }
 
@@ -322,8 +323,8 @@ function PeriodLink({
     : "px-3 py-1.5 rounded-full text-sm border cursor-pointer border-gray-300 text-gray-700 hover:bg-gray-50";
 
   return (
-    <a href={href} className={linkClass}>
+    <Link href={href} className={linkClass}>
       {label}
-    </a>
+    </Link>
   );
 }
