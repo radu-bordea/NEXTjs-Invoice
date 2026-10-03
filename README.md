@@ -9,6 +9,7 @@
 - npm install lucide-react
 - npm install sonner
 - npm install recharts
+- npm install stripe
 
 # files
 - find app -type f
@@ -19,6 +20,7 @@
 - npx prisma db push
 - npx prisma generate
 - npx tsx prisma/reset.ts
+- npx prisma migrate dev --name add_subscription
 
 
 # test

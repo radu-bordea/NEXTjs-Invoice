@@ -93,3 +93,19 @@ enum InvoiceStatus {
   SENT
   PAID
 }
+
+/// Tracks a user's Stripe subscription status. One row per user —
+/// created/updated by the Stripe webhook whenever a checkout
+/// completes or a subscription's status changes (renewed, canceled,
+/// payment failed, etc). This is the single source of truth the
+/// free-tier gate checks before letting someone past 3 invoices.
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String?   @unique
+  status               String    // "active", "canceled", "past_due", "incomplete", etc.
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
