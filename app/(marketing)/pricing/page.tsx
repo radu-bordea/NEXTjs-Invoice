@@ -1,6 +1,11 @@
-import Link from "next/link"
+import Link from "next/link";
+import { createCheckoutSession } from "@/actions/subscription.actions";
 
-export default function PricingPage() {
+import { auth } from "@clerk/nextjs/server";
+import { SignUpButton } from "@clerk/nextjs";
+
+export default async function PricingPage() {
+  const { userId } = await auth();
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <div className="text-center mb-12">
@@ -31,7 +36,7 @@ export default function PricingPage() {
           <Link
             href="/dashboard/invoices"
             className="mt-8 text-center px-6 py-3 rounded-full border border-gray-300 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
-          > 
+          >
             Get started free
           </Link>
         </div>
@@ -54,12 +59,22 @@ export default function PricingPage() {
             <PlanRow included>Reports & Skatteetaten export</PlanRow>
           </ul>
 
-          <Link
-            href="/dashboard/invoices"
-            className="mt-8 text-center px-6 py-3 rounded-full bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors cursor-pointer"
-          >
-            Subscribe — coming soon
-          </Link>
+          {userId ? (
+            <form action={createCheckoutSession} className="mt-8">
+              <button
+                type="submit"
+                className="w-full text-center px-6 py-3 rounded-full bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors cursor-pointer"
+              >
+                Subscribe
+              </button>
+            </form>
+          ) : (
+            <SignUpButton>
+              <button className="mt-8 w-full text-center px-6 py-3 rounded-full bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors cursor-pointer">
+                Sign up to subscribe
+              </button>
+            </SignUpButton>
+          )}
         </div>
       </div>
 
@@ -67,15 +82,15 @@ export default function PricingPage() {
         Prices shown in NOK. Cancel anytime once subscriptions are live.
       </p>
     </main>
-  )
+  );
 }
 
 function PlanRow({
   children,
   included = false,
 }: {
-  children: React.ReactNode
-  included?: boolean
+  children: React.ReactNode;
+  included?: boolean;
 }) {
   return (
     <li className="flex items-start gap-2">
@@ -84,5 +99,5 @@ function PlanRow({
       </span>
       <span className={included ? "" : "text-gray-400"}>{children}</span>
     </li>
-  )
+  );
 }

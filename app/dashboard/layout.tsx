@@ -27,6 +27,9 @@ export default async function DashboardLayout({
           <Link href="/dashboard/reports" className="hover:text-teal-700">
             Reports
           </Link>
+          <Link href="/pricing" className="hover:text-purple-700">
+            Pricing
+          </Link>
         </nav>
         <UserButton />
       </header>
