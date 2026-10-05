@@ -147,6 +147,7 @@ export function ReportPDF({
         )}
 
         <Text style={styles.footer}>
+          Includes issued invoices (sent and paid) by invoice date; drafts are excluded.{" "}
           This is a personal reference summary generated from your own invoice
           records. It is not a substitute for filing your MVA return with
           Skatteetaten via Altinn.

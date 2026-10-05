@@ -1,30 +1,29 @@
-import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
-import { calculateInvoiceTotals } from "@/lib/invoice-calculations"
+import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client";
+import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
-type InvoiceWithLineItems = Invoice & { lineItems: WorkLogItem[] }
+type InvoiceWithLineItems = Invoice & { lineItems: WorkLogItem[] };
 
 /**
  * One month's worth of aggregated figures, used to feed the
  * revenue chart and the year-summary cards.
  */
 export type MonthlyReport = {
-  month: number // 1-12
-  monthLabel: string // "Jan", "Feb", ...
-  billedTotal: number // every invoice, any status
-  paidTotal: number // PAID invoices only — actual received income
-  vatCollected: number // VAT portion of PAID invoices only
-}
+  month: number; // 1-12
+  monthLabel: string; // "Jan", "Feb", ...
+  billedTotal: number; // SENT + PAID invoices (drafts excluded)
+  paidTotal: number; // PAID invoices only: money actually received
+  vatCollected: number; // VAT on SENT + PAID invoices (by invoice date)
+};
 
 /**
- * Aggregates a set of invoices (already filtered to one year) into
- * per-month totals. "Billed" counts every invoice regardless of
- * status — it's what you've charged clients. "Paid" and
- * "vatCollected" count only PAID invoices — actual money received
- * and the tax portion of it, which is what matters for real
- * revenue tracking and MVA reporting.
+ * Aggregates invoices (already filtered to one period) into
+ * per-month totals. "Billed" and "vatCollected" count every issued
+ * invoice (SENT or PAID), because MVA is reported for the period of
+ * the invoice date. "Paid" counts only PAID invoices: money received.
+ * DRAFTs are never counted.
  */
 export function aggregateByMonth(
-  invoices: InvoiceWithLineItems[]
+  invoices: InvoiceWithLineItems[],
 ): MonthlyReport[] {
   const months: MonthlyReport[] = Array.from({ length: 12 }, (_, i) => ({
     month: i + 1,
@@ -32,33 +31,31 @@ export function aggregateByMonth(
     billedTotal: 0,
     paidTotal: 0,
     vatCollected: 0,
-  }))
+  }));
 
- for (const invoice of invoices) {
-  const { grandTotal, vatAmount } = calculateInvoiceTotals({
-    billingType: invoice.billingType,
-    fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
-    lineItems: invoice.lineItems,
-    mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-    invoiceDate: invoice.invoiceDate,
-  })
+  for (const invoice of invoices) {
+    const { grandTotal, vatAmount } = calculateInvoiceTotals({
+      billingType: invoice.billingType,
+      fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
+      lineItems: invoice.lineItems,
+      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+      invoiceDate: invoice.invoiceDate,
+    });
 
-  const monthIndex = new Date(invoice.invoiceDate).getMonth()
+    const monthIndex = new Date(invoice.invoiceDate).getMonth();
 
-  // Only count invoices that have actually been sent — a DRAFT
-  // hasn't been billed to anyone yet, so it shouldn't count toward
-  // "billed" revenue.
-  if (invoice.status === "SENT" || invoice.status === "PAID") {
-    months[monthIndex].billedTotal += grandTotal
+    // DRAFTs are not issued invoices, so they are never counted.
+    if (invoice.status === "SENT" || invoice.status === "PAID") {
+      months[monthIndex].billedTotal += grandTotal;
+      months[monthIndex].vatCollected += vatAmount;
+    }
+
+    if (invoice.status === "PAID") {
+      months[monthIndex].paidTotal += grandTotal;
+    }
   }
 
-  if (invoice.status === "PAID") {
-    months[monthIndex].paidTotal += grandTotal
-    months[monthIndex].vatCollected += vatAmount
-  }
-}
-
-  return months
+  return months;
 }
 
 /**
@@ -73,10 +70,9 @@ export function summarizeYear(monthly: MonthlyReport[]) {
       paidTotal: acc.paidTotal + m.paidTotal,
       vatCollected: acc.vatCollected + m.vatCollected,
     }),
-    { billedTotal: 0, paidTotal: 0, vatCollected: 0 }
-  )
+    { billedTotal: 0, paidTotal: 0, vatCollected: 0 },
+  );
 }
-
 
 /**
  * Norway's standard MVA filing periods — six bi-monthly terms per
@@ -91,27 +87,30 @@ export const MVA_PERIODS = [
   { id: "jul-aug", label: "Jul–Aug", startMonth: 7, endMonth: 8 },
   { id: "sep-oct", label: "Sep–Oct", startMonth: 9, endMonth: 10 },
   { id: "nov-dec", label: "Nov–Dec", startMonth: 11, endMonth: 12 },
-] as const
+] as const;
 
-export type MvaPeriodId = (typeof MVA_PERIODS)[number]["id"]
+export type MvaPeriodId = (typeof MVA_PERIODS)[number]["id"];
 
 /**
  * Finds a period definition by its id, or returns undefined if the
  * id doesn't match any known period (e.g. bad/missing query param).
  */
 export function getMvaPeriod(id: string | undefined) {
-  return MVA_PERIODS.find((p) => p.id === id)
+  return MVA_PERIODS.find((p) => p.id === id);
 }
 
 /**
  * Builds the inclusive start/end Date range for a given period and
  * year — used directly in the Prisma query's invoiceDate filter.
  */
-export function getPeriodDateRange(year: number, period: (typeof MVA_PERIODS)[number]) {
-  const start = new Date(year, period.startMonth - 1, 1)
+export function getPeriodDateRange(
+  year: number,
+  period: (typeof MVA_PERIODS)[number],
+) {
+  const start = new Date(year, period.startMonth - 1, 1);
   // First day of the month AFTER the period ends — used with `lt`
   // (less than) in the Prisma query, so it correctly includes the
   // entire last day of the period's final month.
-  const end = new Date(year, period.endMonth, 1)
-  return { start, end }
+  const end = new Date(year, period.endMonth, 1);
+  return { start, end };
 }

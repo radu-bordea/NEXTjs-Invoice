@@ -37,6 +37,7 @@ export default async function ReportsPage({
   const invoices = await prisma.invoice.findMany({
     where: {
       userId,
+      status: { in: ["SENT", "PAID"] }, // NEW
       invoiceDate: {
         gte: dateRange.start,
         lt: dateRange.end,
@@ -97,7 +98,7 @@ export default async function ReportsPage({
         <SummaryCard
           label="Total billed"
           value={summary.billedTotal}
-          hint="All invoices, any status"
+          hint="Sent and paid invoices"
         />
         <SummaryCard
           label="Total received"
@@ -108,7 +109,7 @@ export default async function ReportsPage({
         <SummaryCard
           label="VAT collected"
           value={summary.vatCollected}
-          hint="From paid invoices"
+          hint="From sent and paid invoices"
           variant="warning"
         />
       </div>
