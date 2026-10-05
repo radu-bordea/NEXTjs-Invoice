@@ -3,14 +3,15 @@ import {
   createCheckoutSession,
   createPortalSession,
 } from "@/actions/subscription.actions";
-import { isUserSubscribed } from "@/lib/subscription";
+import { getActiveSubscription } from "@/lib/subscription"; // CHANGED
 
 import { auth } from "@clerk/nextjs/server";
 import { SignUpButton } from "@clerk/nextjs";
 
 export default async function PricingPage() {
   const { userId } = await auth();
-  const subscribed = userId ? await isUserSubscribed(userId) : false;
+  const sub = userId ? await getActiveSubscription(userId) : null; // CHANGED
+  const subscribed = !!sub; // CHANGED
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
@@ -43,14 +44,14 @@ export default async function PricingPage() {
             href="/dashboard/invoices"
             className="mt-8 text-center px-6 py-3 rounded-full border border-gray-300 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            Get started free
+            {subscribed ? "Go to dashboard" : "Get started free"} {/* CHANGED */}
           </Link>
         </div>
 
         {/* Paid tier */}
         <div className="rounded-lg border-2 border-teal-700 p-8 flex flex-col relative">
           <span className="absolute -top-3 left-8 bg-teal-700 text-white text-xs font-medium px-3 py-1 rounded-full">
-            Most popular
+            {subscribed ? "Your plan" : "Most popular"} {/* CHANGED */}
           </span>
           <h2 className="text-xl font-semibold mb-1">Pro</h2>
           <p className="text-3xl font-bold mb-1">NOK 149</p>
@@ -65,8 +66,16 @@ export default async function PricingPage() {
             <PlanRow included>Reports & Skatteetaten export</PlanRow>
           </ul>
 
+          {/* CHANGED: period end line */}
+          {sub?.currentPeriodEnd && (
+            <p className="text-sm text-teal-700 mt-6 text-center">
+              Current period ends{" "}
+              {sub.currentPeriodEnd.toLocaleDateString("en-GB")}
+            </p>
+          )}
+
           {subscribed ? (
-            <form action={createPortalSession} className="mt-8">
+            <form action={createPortalSession} className="mt-4">
               <button
                 type="submit"
                 className="w-full text-center px-6 py-3 rounded-full bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors cursor-pointer"

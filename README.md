@@ -25,3 +25,9 @@
 
 # test
 - npm run build && npm run start
+
+# json to add
+- "dev:local": "next dev --webpack",
+- "build:local": "next build --webpack"
+
+- npx tsc --noEmit

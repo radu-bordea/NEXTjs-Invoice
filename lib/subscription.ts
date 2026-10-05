@@ -8,3 +8,9 @@ export async function isUserSubscribed(userId: string): Promise<boolean> {
   const sub = await prisma.subscription.findUnique({ where: { userId } })
   return !!sub && ACTIVE_STATUSES.includes(sub.status)
 }
+
+export async function getActiveSubscription(userId: string) {
+  const sub = await prisma.subscription.findUnique({ where: { userId } })
+  if (!sub || !ACTIVE_STATUSES.includes(sub.status)) return null
+  return sub
+}
