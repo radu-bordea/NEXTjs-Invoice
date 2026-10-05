@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { createCheckoutSession } from "@/actions/subscription.actions";
+import {
+  createCheckoutSession,
+  createPortalSession,
+} from "@/actions/subscription.actions";
+import { isUserSubscribed } from "@/lib/subscription";
 
 import { auth } from "@clerk/nextjs/server";
 import { SignUpButton } from "@clerk/nextjs";
 
 export default async function PricingPage() {
   const { userId } = await auth();
+  const subscribed = userId ? await isUserSubscribed(userId) : false;
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <div className="text-center mb-12">
@@ -59,7 +65,16 @@ export default async function PricingPage() {
             <PlanRow included>Reports & Skatteetaten export</PlanRow>
           </ul>
 
-          {userId ? (
+          {subscribed ? (
+            <form action={createPortalSession} className="mt-8">
+              <button
+                type="submit"
+                className="w-full text-center px-6 py-3 rounded-full bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors cursor-pointer"
+              >
+                Manage subscription
+              </button>
+            </form>
+          ) : userId ? (
             <form action={createCheckoutSession} className="mt-8">
               <button
                 type="submit"

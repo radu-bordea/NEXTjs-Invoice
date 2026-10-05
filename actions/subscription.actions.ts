@@ -48,3 +48,18 @@ export async function createCheckoutSession() {
   if (!session.url) throw new Error("Failed to create checkout session")
   redirect(session.url)
 }
+
+export async function createPortalSession() {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
+
+  const sub = await prisma.subscription.findUnique({ where: { userId } })
+  if (!sub) throw new Error("No subscription found")
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: sub.stripeCustomerId,
+    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+  })
+
+  redirect(session.url)
+}
