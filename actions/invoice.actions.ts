@@ -6,6 +6,7 @@ import { invoiceSchema } from "@/lib/zod/invoice.schema";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {getInvoiceQuota} from "@/lib/subscription";
 
 /**
  * Shape of the object returned by `createInvoice`.
@@ -69,6 +70,14 @@ export async function createInvoice(
 ): Promise<CreateInvoiceState> {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
+
+  const quota = await getInvoiceQuota(userId)
+if (!quota.canCreate) {
+  return {
+    success: false,
+    message: `Free plan limit reached: ${quota.limit} invoices per month. Upgrade to Pro for unlimited invoices.`,
+  }
+}
 
   const companyProfile = await prisma.companyProfile.findUnique({
     where: { userId },

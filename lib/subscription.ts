@@ -14,3 +14,24 @@ export async function getActiveSubscription(userId: string) {
   if (!sub || !ACTIVE_STATUSES.includes(sub.status)) return null
   return sub
 }
+
+export const FREE_INVOICE_LIMIT = 3
+
+export async function getMonthlyInvoiceCount(userId: string) {
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  return prisma.invoice.count({
+    where: { userId, createdAt: { gte: startOfMonth } },
+  })
+}
+
+export async function getInvoiceQuota(userId: string) {
+  const subscribed = await isUserSubscribed(userId)
+  const used = await getMonthlyInvoiceCount(userId)
+  return {
+    subscribed,
+    used,
+    limit: FREE_INVOICE_LIMIT,
+    canCreate: subscribed || used < FREE_INVOICE_LIMIT,
+  }
+}
