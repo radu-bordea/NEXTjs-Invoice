@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import {PlanBadge} from "@/components/PlanBadge";
 
 export default async function DashboardLayout({
   children,
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
           <Link href="/pricing" className="hover:text-purple-700">
             Pricing
           </Link>
+          <PlanBadge />
         </nav>
         <UserButton />
       </header>

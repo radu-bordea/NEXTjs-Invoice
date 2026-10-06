@@ -35,3 +35,16 @@ export async function getInvoiceQuota(userId: string) {
     canCreate: subscribed || used < FREE_INVOICE_LIMIT,
   }
 }
+
+export async function getPlanInfo(userId: string) {
+  const sub = await getActiveSubscription(userId)
+  if (sub) {
+    return {
+      plan: "pro" as const,
+      cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+      periodEnd: sub.currentPeriodEnd,
+    }
+  }
+  const used = await getMonthlyInvoiceCount(userId)
+  return { plan: "free" as const, used, limit: FREE_INVOICE_LIMIT }
+}

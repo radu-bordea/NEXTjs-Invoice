@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         session.subscription as string
       )
       const periodEnd = sub.items.data[0]?.current_period_end
+      const cancelAtPeriodEnd = sub.cancel_at_period_end || sub.cancel_at != null // NEW
 
       await prisma.subscription.upsert({
         where: { userId },
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
           stripeSubscriptionId: sub.id,
           status: sub.status,
           currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
+          cancelAtPeriodEnd, // NEW
         },
         create: {
           userId,
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
           stripeSubscriptionId: sub.id,
           status: sub.status,
           currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
+          cancelAtPeriodEnd, // NEW
         },
       })
       break
@@ -71,6 +74,7 @@ export async function POST(request: Request) {
         data: {
           status: sub.status,
           currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
+          cancelAtPeriodEnd: sub.cancel_at_period_end || sub.cancel_at != null, // NEW
         },
       })
       break

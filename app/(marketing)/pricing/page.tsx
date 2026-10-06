@@ -44,7 +44,8 @@ export default async function PricingPage() {
             href="/dashboard/invoices"
             className="mt-8 text-center px-6 py-3 rounded-full border border-gray-300 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            {subscribed ? "Go to dashboard" : "Get started free"} {/* CHANGED */}
+            {subscribed ? "Go to dashboard" : "Get started free"}{" "}
+            {/* CHANGED */}
           </Link>
         </div>
 
@@ -66,10 +67,9 @@ export default async function PricingPage() {
             <PlanRow included>Reports & Skatteetaten export</PlanRow>
           </ul>
 
-          {/* CHANGED: period end line */}
           {sub?.currentPeriodEnd && (
             <p className="text-sm text-teal-700 mt-6 text-center">
-              Current period ends{" "}
+              {sub.cancelAtPeriodEnd ? "Cancels on " : "Renews on "}
               {sub.currentPeriodEnd.toLocaleDateString("en-GB")}
             </p>
           )}
