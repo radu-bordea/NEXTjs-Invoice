@@ -4,12 +4,17 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportPDF } from "@/components/reports/ReportPDF";
 import { getMvaPeriod, getPeriodDateRange } from "@/lib/invoice-reports";
 import { NextResponse } from "next/server";
+import { isUserSubscribed } from "@/lib/subscription"
 
 export async function GET(request: Request) {
   const { userId } = await auth();
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+
+  if (!(await isUserSubscribed(userId))) {
+  return new NextResponse("Pro subscription required", { status: 403 })
+}
 
   const { searchParams } = new URL(request.url);
   const yearParam = searchParams.get("year");

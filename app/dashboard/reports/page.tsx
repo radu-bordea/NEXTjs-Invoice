@@ -10,6 +10,9 @@ import {
 import { RevenueChart } from "@/components/reports/RevenueChart";
 import Link from "next/link";
 
+import { isUserSubscribed } from "@/lib/subscription";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
+
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 
@@ -20,6 +23,18 @@ export default async function ReportsPage({
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
+
+  if (!(await isUserSubscribed(userId))) {
+    return (
+      <main className="p-4 sm:p-8 max-w-5xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Reports</h1>
+        <UpgradePrompt
+          title="Reports are a Pro feature"
+          message="Upgrade to Pro to see revenue by month, MVA per period and download Skatteetaten-ready PDF reports."
+        />
+      </main>
+    );
+  }
 
   const { year: yearParam, period: periodParam } = await searchParams;
   const currentYear = new Date().getFullYear();
