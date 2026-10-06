@@ -6,7 +6,6 @@ import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
 import { Eye, Pencil, FileDown, Copy } from "lucide-react";
-import { duplicateInvoice } from "@/actions/invoice.actions";
 
 /**
  * Invoice list page. Supports filtering by status and searching by
@@ -187,15 +186,16 @@ export default async function InvoicesPage({
                           size={16}
                         />
                       </Link>
-                      <form action={duplicateInvoice.bind(null, invoice.id)}>
-                        <button
-                          type="submit"
-                          title="Duplicate"
-                          className="text-gray-600 hover:text-teal-700 cursor-pointer"
-                        >
-                          <Copy className="text-blue-600" size={16} />
-                        </button>
-                      </form>
+                      <Link
+                        href={`/dashboard/invoices/new?from=${invoice.id}`}
+                        className="text-gray-600 hover:text-teal-700"
+                        title="Duplicate"
+                      >
+                        <Copy
+                          className="text-blue-600 cursor-pointer"
+                          size={16}
+                        />
+                      </Link>
                     </div>
                   </td>
                 </tr>

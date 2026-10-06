@@ -47,10 +47,13 @@ function toLineItemRows(items: WorkLogItem[]): LineItemRow[] {
  */
 export function InvoiceForm({
   invoice,
+  template,
 }: {
   invoice?: Invoice & { lineItems: WorkLogItem[] };
+  template?: Invoice & { lineItems: WorkLogItem[] };
 }) {
   const isEditMode = Boolean(invoice);
+  const source = invoice ?? template;
 
   // In edit mode, bind the invoice's id as the first argument so
   // the resulting function matches useActionState's required
@@ -63,19 +66,19 @@ export function InvoiceForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   const [billingType, setBillingType] = useState<"HOURLY" | "FIXED">(
-    invoice?.billingType ?? "HOURLY",
+    source?.billingType ?? "HOURLY",
   );
 
   const [clientFields, setClientFields] = useState({
-    clientName: invoice?.clientName ?? "",
-    clientOrgNr: invoice?.clientOrgNr ?? "",
-    clientAddress: invoice?.clientAddress ?? "",
-    clientEmail: invoice?.clientEmail ?? "",
+    clientName: source?.clientName ?? "",
+    clientOrgNr: source?.clientOrgNr ?? "",
+    clientAddress: source?.clientAddress ?? "",
+    clientEmail: source?.clientEmail ?? "",
   });
 
   const [lineItems, setLineItems] = useState<LineItemRow[]>(
-    invoice?.lineItems && invoice.lineItems.length > 0
-      ? toLineItemRows(invoice.lineItems)
+    source?.lineItems && source.lineItems.length > 0
+      ? toLineItemRows(source.lineItems)
       : [{ ...emptyRow }],
   );
 
@@ -130,7 +133,7 @@ export function InvoiceForm({
         <input type="hidden" name="billingType" value={billingType} />
       </div>
 
-      {!isEditMode && (
+      {!isEditMode && !template && (
         <ClientPicker
           onSelect={(client) => {
             setClientFields(
@@ -224,8 +227,8 @@ export function InvoiceForm({
           required
           defaultValue={
             state.submittedValues?.invoiceDate ??
-            (invoice
-              ? new Date(invoice.invoiceDate).toISOString().split("T")[0]
+            (source
+              ? new Date(source.invoiceDate).toISOString().split("T")[0]
               : "")
           }
           error={state.errors?.invoiceDate}
@@ -237,9 +240,7 @@ export function InvoiceForm({
           required
           defaultValue={
             state.submittedValues?.dueDate ??
-            (invoice
-              ? new Date(invoice.dueDate).toISOString().split("T")[0]
-              : "")
+            (source ? new Date(source.dueDate).toISOString().split("T")[0] : "")
           }
           error={state.errors?.dueDate}
         />
@@ -249,8 +250,8 @@ export function InvoiceForm({
           type="date"
           defaultValue={
             state.submittedValues?.periodStart ??
-            (invoice?.periodStart
-              ? new Date(invoice.periodStart).toISOString().split("T")[0]
+            (source?.periodStart
+              ? new Date(source.periodStart).toISOString().split("T")[0]
               : "")
           }
           error={state.errors?.periodStart}
@@ -261,8 +262,8 @@ export function InvoiceForm({
           type="date"
           defaultValue={
             state.submittedValues?.periodEnd ??
-            (invoice?.periodEnd
-              ? new Date(invoice.periodEnd).toISOString().split("T")[0]
+            (source?.periodEnd
+              ? new Date(source.periodEnd).toISOString().split("T")[0]
               : "")
           }
           error={state.errors?.periodEnd}
@@ -271,7 +272,7 @@ export function InvoiceForm({
           label="Project reference"
           name="projectRef"
           defaultValue={
-            state.submittedValues?.projectRef ?? invoice?.projectRef ?? ""
+            state.submittedValues?.projectRef ?? source?.projectRef ?? ""
           }
           error={state.errors?.projectRef}
         />
