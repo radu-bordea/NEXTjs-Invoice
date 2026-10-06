@@ -1,10 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { Eye, Pencil, FileDown } from "lucide-react";
 import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
+
+import { Eye, Pencil, FileDown, Copy } from "lucide-react";
+import { duplicateInvoice } from "@/actions/invoice.actions";
 
 /**
  * Invoice list page. Supports filtering by status and searching by
@@ -84,7 +86,7 @@ export default async function InvoicesPage({
         <p className="text-gray-500">No invoices found.</p>
       ) : (
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[900px] text-sm border-collapse text-left">
+          <table className="w-full min-w-225 text-sm border-collapse text-left">
             <thead>
               <tr className="text-left border-b">
                 <th className="py-2 px-3 text-left whitespace-nowrap">
@@ -185,6 +187,15 @@ export default async function InvoicesPage({
                           size={16}
                         />
                       </Link>
+                      <form action={duplicateInvoice.bind(null, invoice.id)}>
+                        <button
+                          type="submit"
+                          title="Duplicate"
+                          className="text-gray-600 hover:text-teal-700 cursor-pointer"
+                        >
+                          <Copy className="text-blue-600" size={16} />
+                        </button>
+                      </form>
                     </div>
                   </td>
                 </tr>
