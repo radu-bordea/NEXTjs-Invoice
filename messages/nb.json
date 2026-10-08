@@ -21,7 +21,7 @@
     "subtitle": "Lag profesjonelle fakturaer, før timer eller bruk fastpris, og last ned PDF-er klare for Skatteetaten på få minutter – uten regneark og uten Google Docs-maler.",
     "cta": "Gå til dashbord",
     "norwayTitle": "Laget for Norge",
-    "norwayText": "Org.nr, MVA-grenser og IBAN/KID-felter – satt opp slik Skatteetaten forventer.",
+    "norwayText": "Org.nr, MVA-grenser og IBAN-felter – satt opp slik Skatteetaten forventer.",
     "billingTitle": "Timebasert eller fastpris",
     "billingText": "Før timer mot en timepris, eller fakturer en fast prosjektpris – velg per faktura.",
     "draftTitle": "Utkast, rediger, last ned",
@@ -127,5 +127,412 @@
     "saving": "Lagrer...",
     "saveChanges": "Lagre endringer",
     "create": "Opprett faktura"
+  },
+  "NewInvoice": {
+    "title": "Ny faktura",
+    "limitTitle": "Du har brukt dine {limit} gratis fakturaer denne måneden",
+    "limitMessage": "Oppgrader til Pro for ubegrenset antall fakturaer, e-postutsending og rapporter til Skatteetaten. Grensen nullstilles den 1. i måneden.",
+    "usage": "{used} av {limit} gratis fakturaer brukt denne måneden"
+  },
+  "EditInvoice": {
+    "title": "Rediger faktura {number}"
+  },
+  "InvoiceView": {
+    "title": "Faktura {number}",
+    "edit": "Rediger",
+    "downloadPdf": "Last ned PDF",
+    "from": "Fra",
+    "billTo": "Faktura til",
+    "orgNr": "Org.nr",
+    "invoiceDate": "Fakturadato:",
+    "dueDate": "Forfallsdato:",
+    "period": "Periode:",
+    "projectRef": "Prosjektreferanse:",
+    "workLog": "Timeliste",
+    "colDate": "Dato",
+    "colDescription": "Beskrivelse",
+    "colHours": "Timer",
+    "colRate": "Timepris",
+    "colTotal": "Sum",
+    "projectPrice": "Prosjektpris:",
+    "workBefore": "Arbeid før MVA-registrering (25 % MVA)",
+    "workBeforeHint": "(over 50 000 NOK må beskattes)",
+    "workAfter": "Arbeid etter MVA-registrering (25 % MVA)",
+    "vat": "25 % MVA",
+    "noVat": "Denne fakturaen inkluderer ikke MVA. MVA-registrering legges til når omsetningen overstiger NOK 50 000 i løpet av en periode på 12 måneder.",
+    "totalDue": "Totalt å betale:",
+    "paymentDetails": "Betalingsinformasjon",
+    "account": "IBAN / kontonummer:",
+    "bank": "Bank:",
+    "currency": "Valuta:"
+  },
+  "StatusButtons": {
+    "markSent": "Marker som sendt",
+    "markPaid": "Marker som betalt",
+    "revert": "Tilbake til utkast",
+    "paidNote": "✓ Denne fakturaen er markert som betalt.",
+    "confirmSent": "Markere denne fakturaen som sendt? Det betyr at den er levert til kunden.",
+    "confirmPaid": "Markere denne fakturaen som betalt? Dette er en endelig status og kan ikke angres.",
+    "confirmRevert": "Sette denne fakturaen tilbake til utkast? Den vil ikke lenger være markert som sendt."
+  },
+  "ViewNotice": {
+    "editBlockedTitle": "Bare utkast kan redigeres.",
+    "editBlockedDescription": "Denne fakturaen er allerede sendt eller betalt."
+  },
+  "CompanyProfile": {
+    "title": "Firmaprofil",
+    "companyName": "Firmanavn",
+    "orgNr": "Org.nr",
+    "address": "Adresse",
+    "phone": "Telefon",
+    "email": "E-post",
+    "mvaFrom": "MVA-registrert fra",
+    "mvaFromHint": "MVA-registrert fra (la stå tomt hvis ikke registrert ennå)",
+    "notRegistered": "Ikke registrert",
+    "account": "IBAN / kontonummer",
+    "bic": "BIC/SWIFT",
+    "bicOptional": "BIC/SWIFT (valgfritt)",
+    "bankName": "Banknavn",
+    "edit": "Rediger profil",
+    "save": "Lagre profil",
+    "saving": "Lagrer...",
+    "cancel": "Avbryt",
+    "fixErrors": "Rett opp feilene nedenfor.",
+    "saved": "Firmaprofilen ble lagret."
+  },
+  "Reports": {
+    "title": "Rapporter",
+    "lockedTitle": "Rapporter er en Pro-funksjon",
+    "lockedMessage": "Oppgrader til Pro for å se omsetning per måned, MVA per termin og laste ned PDF-rapporter klare for Skatteetaten.",
+    "allYear": "Hele året",
+    "totalBilled": "Totalt fakturert",
+    "totalBilledHint": "Sendte og betalte fakturaer",
+    "totalReceived": "Totalt mottatt",
+    "totalReceivedHint": "Kun betalte fakturaer",
+    "vatCollected": "MVA innkrevd",
+    "vatCollectedHint": "Fra sendte og betalte fakturaer",
+    "revenueByMonth": "Omsetning per måned — {year}",
+    "invoicesInPeriod": "Fakturaer i denne perioden",
+    "noInvoices": "Ingen fakturaer i denne perioden.",
+    "colInvoice": "Faktura nr.",
+    "colClient": "Kunde",
+    "colDate": "Dato",
+    "colStatus": "Status",
+    "colAmount": "Beløp",
+    "colVat": "MVA",
+    "total": "Totalt",
+    "downloadPdf": "Last ned PDF",
+    "billed": "Fakturert",
+    "paid": "Betalt",
+    "periods": {
+      "jan-feb": "Jan–Feb",
+      "mar-apr": "Mar–Apr",
+      "may-jun": "Mai–Jun",
+      "jul-aug": "Jul–Aug",
+      "sep-oct": "Sep–Okt",
+      "nov-dec": "Nov–Des"
+    },
+    "months": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "Mai",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Aug",
+      "9": "Sep",
+      "10": "Okt",
+      "11": "Nov",
+      "12": "Des"
+    }
+  },
+  "Errors": {
+    "nameRequired": "Firmanavn er påkrevd",
+    "orgNrInvalid": "Org.nr må være nøyaktig 9 siffer",
+    "addressRequired": "Adresse er påkrevd",
+    "phoneRequired": "Telefon er påkrevd",
+    "phoneInvalid": "Telefon kan bare inneholde tall, mellomrom og eventuelt + først",
+    "emailInvalid": "Ugyldig e-postadresse",
+    "accountRequired": "IBAN eller kontonummer er påkrevd",
+    "bankNameRequired": "Banknavn er påkrevd",
+    "dateRequired": "Dato er påkrevd",
+    "descriptionRequired": "Beskrivelse er påkrevd",
+    "hoursPositive": "Timer må være større enn 0",
+    "ratePositive": "Timepris må være større enn 0",
+    "invoiceNumberRequired": "Fakturanummer er påkrevd",
+    "invoiceDateRequired": "Fakturadato er påkrevd",
+    "dueDateRequired": "Forfallsdato er påkrevd",
+    "clientNameRequired": "Kundenavn er påkrevd",
+    "clientAddressRequired": "Kundens adresse er påkrevd",
+    "lineItemsRequired": "Legg til minst én rad i timelisten for en timebasert faktura",
+    "fixedPriceRequired": "Fastpris er påkrevd for en fastprisfaktura",
+    "fixedPricePositive": "Fastpris må være større enn 0"
+  },
+  "InvoiceActions": {
+    "quotaReached": "Grensen for gratisplanen er nådd: {limit} fakturaer per måned. Oppgrader til Pro for ubegrenset antall fakturaer.",
+    "profileRequired": "Fullfør firmaprofilen din før du oppretter en faktura.",
+    "invalidLineItems": "Ugyldige data i timelisten.",
+    "fixErrors": "Rett opp feilene nedenfor.",
+    "notFound": "Fant ikke fakturaen.",
+    "onlyDrafts": "Bare utkast kan redigeres."
+  },
+  "InvoicePDF": {
+    "title": "FAKTURA",
+    "orgNr": "Org.nr",
+    "billTo": "Faktura til:",
+    "invoiceNumber": "Fakturanummer",
+    "invoiceDate": "Fakturadato",
+    "dueDate": "Forfallsdato",
+    "period": "Arbeidsperiode",
+    "projectRef": "Prosjektreferanse",
+    "workLog": "Timeliste",
+    "colDate": "Dato",
+    "colDescription": "Beskrivelse",
+    "colHours": "Timer",
+    "colRate": "Timepris",
+    "colTotal": "Sum",
+    "projectPrice": "Prosjektpris",
+    "workBefore": "Arbeid før MVA-registrering (25 % MVA)",
+    "workBeforeHint": "(over 50 000 NOK må beskattes)",
+    "workAfter": "Arbeid etter MVA-registrering (25 % MVA)",
+    "vat": "25 % MVA",
+    "noVat": "Denne fakturaen inkluderer IKKE MVA. MVA-registrering legges til når omsetningen overstiger NOK 50 000 i løpet av en periode på 12 måneder.",
+    "totalDue": "Totalt å betale",
+    "paymentDetails": "Betalingsinformasjon",
+    "account": "IBAN / kontonummer",
+    "bank": "Bank",
+    "currency": "Valuta",
+    "taxNote": "Skatt på inntekt er forretningseierens ansvar og er ikke inkludert i fakturabeløpet."
+  },
+  "ReportPDF": {
+    "title": "Fakturarapport",
+    "period": "Periode",
+    "generated": "Generert",
+    "fullYear": "Hele året {year}",
+    "colNumber": "Faktura nr.",
+    "colClient": "Kunde",
+    "colDate": "Dato",
+    "colStatus": "Status",
+    "colAmount": "Beløp (NOK)",
+    "colVat": "MVA (NOK)",
+    "noInvoices": "Ingen fakturaer i denne perioden.",
+    "total": "Totalt",
+    "footer": "Inkluderer utstedte fakturaer (sendte og betalte) etter fakturadato; utkast er ikke med. Dette er en personlig oversikt generert fra dine egne fakturadata. Den erstatter ikke innsending av MVA-melding til Skatteetaten via Altinn."
+  },
+    "Legal": {
+    "lastUpdated": "Sist oppdatert: {date}"
+  },
+  "Terms": {
+    "title": "Vilkår for bruk",
+    "intro": "Disse vilkårene gjelder for din bruk av {service}. Ved å opprette en konto eller bruke tjenesten godtar du vilkårene. Les dem nøye.",
+    "sections": [
+      {
+        "title": "Om tjenesten og avtalepartene",
+        "paragraphs": [
+          "{service} er en nettbasert tjeneste for å lage, administrere og laste ned fakturaer. Tjenesten leveres av {name}, organisasjonsnummer {orgNr}, et norsk enkeltpersonforetak («vi», «oss»).",
+          "Avtalen inngås mellom oss og deg som oppretter en konto («du»). Tjenesten er laget for næringsdrivende, for eksempel frilansere og enkeltpersonforetak, og skal brukes i næringsvirksomhet."
+        ]
+      },
+      {
+        "title": "Konto",
+        "items": [
+          "Du må være minst 18 år og ha rettslig handleevne for å bruke tjenesten.",
+          "Du må oppgi riktige opplysninger og holde dem oppdatert.",
+          "Du er ansvarlig for å holde innloggingen din hemmelig og for aktivitet som skjer på kontoen din.",
+          "Gi oss beskjed umiddelbart hvis du mistenker uautorisert bruk av kontoen din."
+        ]
+      },
+      {
+        "title": "Planer og priser",
+        "paragraphs": [
+          "Tjenesten har to planer. Vi kan videreutvikle innholdet i planene over tid, men vi endrer ikke prisen på et løpende abonnement uten varsel (se punkt 4)."
+        ],
+        "items": [
+          "Gratis: opptil 3 fakturaer per kalendermåned, firmaprofil, forhåndsutfylling av kunder og PDF-nedlasting.",
+          "Pro: 149 NOK per måned inkludert MVA. Ubegrenset antall fakturaer, e-postutsending til kunder (når funksjonen er tilgjengelig) og rapporter, inkludert eksport til bruk overfor Skatteetaten."
+        ]
+      },
+      {
+        "title": "Betaling og abonnement",
+        "items": [
+          "Pro betales månedlig i forskudd via Stripe. Vi lagrer ikke kortopplysningene dine; de håndteres av Stripe.",
+          "Abonnementet fornyes automatisk hver måned til du sier det opp.",
+          "Du kan si opp når som helst via «Administrer abonnement» på prissiden. Oppsigelsen gjelder fra utløpet av inneværende betalte periode, og du beholder Pro-funksjonene ut perioden.",
+          "Betalte perioder refunderes ikke, med mindre ufravikelig lov krever noe annet.",
+          "Vi varsler minst 30 dager i forveien før vi endrer prisen på et løpende abonnement.",
+          "Hvis en betaling mislykkes, kan tilgangen til Pro-funksjoner stanses til betalingen er i orden. Kontoen går da tilbake til Gratis-planen."
+        ]
+      },
+      {
+        "title": "Ditt ansvar for fakturaer, MVA og regnskap",
+        "paragraphs": [
+          "Du er selv ansvarlig for innholdet i fakturaene du lager, for at de er riktige, og for at de oppfyller kravene i gjeldende lover, blant annet bokføringsloven, merverdiavgiftsloven og regnskapsloven.",
+          "{service} er et verktøy. Tjenesten gir ikke regnskaps-, skatte- eller juridisk rådgivning. MVA-beregninger og rapporter er hjelpemidler som du selv må kontrollere. Rapportene er en personlig oversikt og erstatter ikke innsending av MVA-melding til Skatteetaten via Altinn.",
+          "Du er selv ansvarlig for å oppbevare regnskapsmateriale i samsvar med bokføringsloven (normalt i fem år). Last ned og sikkerhetskopier fakturaene dine; tjenesten er ikke et arkiv- eller regnskapssystem."
+        ]
+      },
+      {
+        "title": "Dine data",
+        "paragraphs": [
+          "Du eier dataene du legger inn. Du gir oss rett til å lagre og behandle dem, men bare for å levere tjenesten til deg.",
+          "Fakturaene dine inneholder personopplysninger om kundene dine. For disse er du behandlingsansvarlig og vi er databehandler. Se personvernerklæringen for detaljer. Trenger du en separat databehandleravtale, kontakt oss på {email}."
+        ]
+      },
+      {
+        "title": "Akseptabel bruk",
+        "paragraphs": ["Du skal ikke:"],
+        "items": [
+          "bruke tjenesten til ulovlig virksomhet, svindel eller utstedelse av falske fakturaer",
+          "forsøke å få uautorisert tilgang til tjenesten eller andres data, eller forstyrre driften",
+          "omgå grensene i Gratis-planen, for eksempel ved å opprette flere kontoer",
+          "videreselge tjenesten eller bruke den til å bygge en konkurrerende tjeneste"
+        ]
+      },
+      {
+        "title": "Tilgjengelighet og endringer",
+        "paragraphs": [
+          "Vi gjør vårt beste for å holde tjenesten tilgjengelig og trygg, men leverer den «som den er». Vi garanterer ikke at den alltid er tilgjengelig eller feilfri, og vi kan stanse den midlertidig for vedlikehold.",
+          "Vi kan videreutvikle, endre eller fjerne funksjoner. Hvis vi avvikler tjenesten, varsler vi deg i god tid slik at du kan laste ned dataene dine."
+        ]
+      },
+      {
+        "title": "Ansvarsbegrensning",
+        "paragraphs": [
+          "I den grad loven tillater det, er vi ikke ansvarlige for indirekte tap, som tapt inntekt, tapt fortjeneste, tap av data eller følgeskader, og vi er ikke ansvarlige for feil som skyldes opplysningene du selv har lagt inn.",
+          "Vårt samlede ansvar overfor deg er begrenset til det du har betalt oss de siste 12 månedene før kravet oppstod.",
+          "Begrensningene gjelder ikke ved forsett eller grov uaktsomhet, eller der ufravikelig lov krever noe annet."
+        ]
+      },
+      {
+        "title": "Oppsigelse og sletting av konto",
+        "paragraphs": [
+          "Du kan slutte å bruke tjenesten når som helst, og du kan be oss slette kontoen og dataene dine ved å kontakte oss på {email}.",
+          "Vi kan stenge eller si opp kontoen din hvis du vesentlig bryter disse vilkårene. Hvis mulig varsler vi deg først og gir deg mulighet til å hente ut dataene dine.",
+          "Hva som skjer med dataene dine etter sletting, står i personvernerklæringen."
+        ]
+      },
+      {
+        "title": "Endringer i vilkårene",
+        "paragraphs": [
+          "Vi kan oppdatere disse vilkårene. Ved vesentlige endringer varsler vi deg på e-post eller i tjenesten minst 30 dager før de trer i kraft. Hvis du fortsetter å bruke tjenesten etter det, godtar du de nye vilkårene. Du kan alltid si opp abonnementet før endringene trer i kraft."
+        ]
+      },
+      {
+        "title": "Lovvalg og tvister",
+        "paragraphs": [
+          "Vilkårene er underlagt norsk rett. Tvister skal søkes løst i minnelighet, og ellers avgjøres av norske domstoler. Ufravikelige rettigheter du har etter lov, påvirkes ikke."
+        ]
+      },
+      {
+        "title": "Kontakt",
+        "paragraphs": [
+          "{name} (org.nr {orgNr})",
+          "{address}",
+          "E-post: {email}"
+        ]
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "Personvernerklæring",
+    "intro": "Denne personvernerklæringen forklarer hvordan {name} behandler personopplysninger når du bruker {service}. Vi behandler opplysninger i samsvar med personvernforordningen (GDPR) og den norske personopplysningsloven.",
+    "sections": [
+      {
+        "title": "Behandlingsansvarlig",
+        "paragraphs": [
+          "{name}, org.nr {orgNr}, {address}. Kontakt: {email}.",
+          "For dine egne kontoopplysninger er vi behandlingsansvarlig. For personopplysninger om dine kunder, som du legger inn i fakturaer, er du behandlingsansvarlig og vi er databehandler."
+        ]
+      },
+      {
+        "title": "Hvilke opplysninger vi behandler",
+        "items": [
+          "Kontoopplysninger: e-postadresse, navn og bruker-ID, som håndteres av innloggingstjenesten Clerk.",
+          "Firmaprofil: firmanavn, organisasjonsnummer, adresse, telefon, e-post, bankopplysninger (IBAN eller kontonummer, BIC/SWIFT, banknavn) og eventuell dato for MVA-registrering.",
+          "Fakturadata: kundenavn, organisasjonsnummer, adresse og e-post for dine kunder, samt beskrivelser, timer, priser og beløp.",
+          "Abonnementsdata: Stripe-kunde-ID, abonnementsstatus og periode. Vi lagrer ikke kortnummer; kortopplysninger håndteres av Stripe.",
+          "Tekniske data: IP-adresse, nettlesertype og tidspunkt i serverlogger hos driftsleverandøren vår, og språkvalget ditt (se punkt 7)."
+        ]
+      },
+      {
+        "title": "Formål og behandlingsgrunnlag",
+        "paragraphs": [
+          "Vi bruker opplysningene til formålene nedenfor. Vi selger ikke opplysninger, og vi bruker dem ikke til annonsering eller profilering."
+        ],
+        "items": [
+          "Levere tjenesten, inkludert å lagre og vise fakturaene dine (avtale, GDPR art. 6 nr. 1 bokstav b).",
+          "Håndtere betaling og abonnement og oppfylle regnskaps- og bokføringsplikter (avtale og rettslig forpliktelse, art. 6 nr. 1 bokstav b og c).",
+          "Sikre tjenesten, forebygge misbruk og feilsøke (berettiget interesse, art. 6 nr. 1 bokstav f).",
+          "Svare på henvendelser fra deg (avtale eller berettiget interesse)."
+        ]
+      },
+      {
+        "title": "Databehandlere og mottakere",
+        "paragraphs": [
+          "Vi bruker leverandørene nedenfor for å drive tjenesten. De behandler opplysninger kun for å levere sin del av tjenesten, og vi har avtaler som oppfyller kravene i GDPR. Vi deler ellers ikke opplysningene dine med andre, med mindre vi er rettslig forpliktet til det."
+        ],
+        "items": [
+          "Clerk: innlogging og brukerkontoer",
+          "Neon: databaselagring",
+          "Vercel: hosting og levering av nettstedet",
+          "Stripe: betaling og abonnement",
+          "Resend: utsending av e-post (når funksjonen er aktivert)"
+        ]
+      },
+      {
+        "title": "Overføring utenfor EØS",
+        "paragraphs": [
+          "Noen av leverandørene våre behandler opplysninger i USA eller andre land utenfor EØS. Overføringene skjer på grunnlag av EU-kommisjonens standard personvernbestemmelser (SCC) og/eller EU–USA Data Privacy Framework, slik at opplysningene får et tilsvarende vern."
+        ]
+      },
+      {
+        "title": "Lagring og sletting",
+        "items": [
+          "Vi lagrer opplysningene dine så lenge du har en konto.",
+          "Du kan be oss slette kontoen og dataene dine ved å kontakte oss på {email}. Vi sletter dem innen 30 dager, med unntak av opplysninger vi er pålagt å beholde, for eksempel betalingsinformasjon etter bokføringsloven (normalt fem år).",
+          "Sikkerhetskopier overskrives kort tid etter sletting."
+        ]
+      },
+      {
+        "title": "Informasjonskapsler",
+        "paragraphs": [
+          "Vi bruker bare nødvendige informasjonskapsler (cookies): en øktkapsel for innlogging (Clerk) og en kapsel som husker språkvalget ditt («locale», lagres i ett år). Vi bruker ikke analyse-, markedsførings- eller sporingskapsler, og trenger derfor ikke samtykkebanner. Stripe kan sette egne kapsler når du betaler på Stripes nettsider."
+        ]
+      },
+      {
+        "title": "Dine rettigheter",
+        "paragraphs": [
+          "Du har rett til innsyn i opplysningene vi har om deg, til å få dem rettet eller slettet, til å begrense behandlingen, til å få dem utlevert i et maskinlesbart format (dataportabilitet) og til å protestere mot behandling som bygger på berettiget interesse.",
+          "Kontakt oss på {email} for å bruke rettighetene dine. Du har også rett til å klage til Datatilsynet (www.datatilsynet.no)."
+        ]
+      },
+      {
+        "title": "Informasjonssikkerhet",
+        "paragraphs": [
+          "Vi bruker kryptert tilkobling (HTTPS) og tilgangsstyring slik at hver bruker bare får se sine egne data. Ingen systemer er helt sikre, men vi tar rimelige tekniske og organisatoriske tiltak for å beskytte opplysningene dine. Hvis det skjer et brudd som utløser meldeplikt, varsler vi Datatilsynet og berørte brukere i samsvar med loven."
+        ]
+      },
+      {
+        "title": "Barn",
+        "paragraphs": [
+          "Tjenesten er ikke rettet mot personer under 18 år, og vi samler ikke bevisst inn opplysninger om barn."
+        ]
+      },
+      {
+        "title": "Endringer i erklæringen",
+        "paragraphs": [
+          "Vi kan oppdatere denne erklæringen. Ved vesentlige endringer varsler vi deg på e-post eller i tjenesten. Dato for siste oppdatering står øverst på siden."
+        ]
+      },
+      {
+        "title": "Kontakt",
+        "paragraphs": [
+          "{name} (org.nr {orgNr})",
+          "{address}",
+          "E-post: {email}"
+        ]
+      }
+    ]
   }
 }

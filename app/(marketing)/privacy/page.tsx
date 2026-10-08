@@ -1,11 +1,23 @@
-export default function PrivacyPage() {
+import { getFormatter, getTranslations } from "next-intl/server"
+import { LegalPage, type LegalSection } from "@/components/LegalPage"
+import { LEGAL } from "@/lib/legal-info"
+
+export default async function PrivacyPage() {
+  const t = await getTranslations("Privacy")
+  const tl = await getTranslations("Legal")
+  const format = await getFormatter()
+
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16">
-      <h1 className="text-2xl font-bold mb-4">Privacy Policy</h1>
-      <p className="text-gray-500">
-        This page is coming soon. A full Privacy Policy will be published
-        here before paid subscriptions go live.
-      </p>
-    </main>
+    <LegalPage
+      title={t("title")}
+      updated={tl("lastUpdated", {
+        date: format.dateTime(new Date(LEGAL.lastUpdated), {
+          dateStyle: "long",
+          timeZone: "UTC",
+        }),
+      })}
+      intro={t.raw("intro") as string}
+      sections={t.raw("sections") as LegalSection[]}
+    />
   )
 }

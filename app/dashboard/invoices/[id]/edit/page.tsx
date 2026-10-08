@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { InvoiceForm } from "@/components/invoice/InvoiceForm";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Edit page for an existing invoice. Only DRAFT invoices can be
@@ -17,6 +18,8 @@ export default async function EditInvoicePage({
   if (!userId) throw new Error("Unauthorized");
 
   const { id } = await params;
+
+  const t = await getTranslations("EditInvoice");
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },
@@ -40,7 +43,7 @@ export default async function EditInvoicePage({
   return (
     <main className="max-w-3xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">
-        Edit invoice {invoice.invoiceNumber}
+        {t("title", { number: invoice.invoiceNumber })}
       </h1>
       <InvoiceForm invoice={invoice} />
     </main>

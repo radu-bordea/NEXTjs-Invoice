@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { StatusButtons } from "@/components/invoice/StatusButtons";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { ViewNotice } from "@/components/invoice/ViewNotice";
@@ -9,9 +10,7 @@ import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
 /**
  * Read-only invoice detail page. Confirms the invoice belongs to
- * the logged-in user (not just that the id exists), calculates the
- * MVA breakdown (for HOURLY: before/after split across line items;
- * for FIXED: all-or-nothing based on the invoice date), and offers
+ * the logged-in user, calculates the MVA breakdown and offers
  * status-change buttons.
  */
 export default async function InvoiceViewPage({
@@ -24,14 +23,15 @@ export default async function InvoiceViewPage({
 
   const { id } = await params;
 
+  const t = await getTranslations("InvoiceView");
+  const format = await getFormatter();
+
   const invoice = await prisma.invoice.findUnique({
     where: { id },
     include: { lineItems: { orderBy: { date: "asc" } } },
   });
 
-  // Ownership check: the invoice must exist AND belong to this
-  // user — without this, anyone could view any invoice by guessing
-  // or typing another user's invoice id into the URL.
+  // Ownership check: the invoice must exist AND belong to this user.
   if (!invoice || invoice.userId !== userId) {
     notFound();
   }
@@ -45,6 +45,16 @@ export default async function InvoiceViewPage({
       invoiceDate: invoice.invoiceDate,
     });
 
+  const dateOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  } as const;
+  const fmtDate = (d: Date | string) =>
+    format.dateTime(new Date(d), dateOptions);
+  const fmtMoney = (n: number) =>
+    format.number(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   return (
     <>
       <main className="max-w-3xl mx-auto p-8">
@@ -52,7 +62,7 @@ export default async function InvoiceViewPage({
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold">
-              Invoice {invoice.invoiceNumber}
+              {t("title", { number: invoice.invoiceNumber })}
             </h1>
             <StatusBadge status={invoice.status} />
           </div>
@@ -61,13 +71,13 @@ export default async function InvoiceViewPage({
               href={`/dashboard/invoices/${invoice.id}/edit`}
               className="px-4 py-2 rounded-lg border-b text-sm hover:bg-gray-50 cursor-pointer"
             >
-              Edit
+              {t("edit")}
             </Link>
             <Link
               href={`/dashboard/invoices/${invoice.id}/pdf`}
               className="px-4 py-2 rounded-lg border-b text-sm hover:bg-gray-50 cursor-pointer"
             >
-              Download PDF
+              {t("downloadPdf")}
             </Link>
           </div>
         </div>
@@ -78,18 +88,22 @@ export default async function InvoiceViewPage({
           {/* Issuer / client */}
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-gray-500 mb-1">From</p>
+              <p className="text-sm text-gray-500 mb-1">{t("from")}</p>
               <p className="font-medium">{invoice.issuerName}</p>
-              <p className="text-sm">Org.nr: {invoice.issuerOrgNr}</p>
+              <p className="text-sm">
+                {t("orgNr")}: {invoice.issuerOrgNr}
+              </p>
               <p className="text-sm">{invoice.issuerAddress}</p>
               <p className="text-sm">{invoice.issuerPhone}</p>
               <p className="text-sm">{invoice.issuerEmail}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">Bill to</p>
+              <p className="text-sm text-gray-500 mb-1">{t("billTo")}</p>
               <p className="font-medium">{invoice.clientName}</p>
               {invoice.clientOrgNr && (
-                <p className="text-sm">Org.nr: {invoice.clientOrgNr}</p>
+                <p className="text-sm">
+                  {t("orgNr")}: {invoice.clientOrgNr}
+                </p>
               )}
               <p className="text-sm">{invoice.clientAddress}</p>
               {invoice.clientEmail && (
@@ -103,23 +117,22 @@ export default async function InvoiceViewPage({
           {/* Invoice meta */}
           <div className="grid grid-cols-2 gap-2 text-sm">
             <p>
-              <span className="text-gray-500">Invoice date:</span>{" "}
-              {new Date(invoice.invoiceDate).toLocaleDateString()}
+              <span className="text-gray-500">{t("invoiceDate")}</span>{" "}
+              {fmtDate(invoice.invoiceDate)}
             </p>
             <p>
-              <span className="text-gray-500">Due date:</span>{" "}
-              {new Date(invoice.dueDate).toLocaleDateString()}
+              <span className="text-gray-500">{t("dueDate")}</span>{" "}
+              {fmtDate(invoice.dueDate)}
             </p>
             {invoice.periodStart && invoice.periodEnd && (
               <p className="col-span-2">
-                <span className="text-gray-500">Period:</span>{" "}
-                {new Date(invoice.periodStart).toLocaleDateString()} –{" "}
-                {new Date(invoice.periodEnd).toLocaleDateString()}
+                <span className="text-gray-500">{t("period")}</span>{" "}
+                {fmtDate(invoice.periodStart)} – {fmtDate(invoice.periodEnd)}
               </p>
             )}
             {invoice.projectRef && (
               <p className="col-span-2">
-                <span className="text-gray-500">Project reference:</span>{" "}
+                <span className="text-gray-500">{t("projectRef")}</span>{" "}
                 {invoice.projectRef}
               </p>
             )}
@@ -130,28 +143,26 @@ export default async function InvoiceViewPage({
           {/* Work log or fixed price */}
           {invoice.billingType === "HOURLY" ? (
             <div>
-              <p className="text-sm font-medium mb-2">Work log</p>
+              <p className="text-sm font-medium mb-2">{t("workLog")}</p>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left border-b text-gray-500">
-                    <th className="py-1 pr-4">Date</th>
-                    <th className="py-1 pr-4">Description</th>
-                    <th className="py-1 pr-4">Hours</th>
-                    <th className="py-1 pr-4">Rate</th>
-                    <th className="py-1 pr-4">Total</th>
+                    <th className="py-1 pr-4">{t("colDate")}</th>
+                    <th className="py-1 pr-4">{t("colDescription")}</th>
+                    <th className="py-1 pr-4">{t("colHours")}</th>
+                    <th className="py-1 pr-4">{t("colRate")}</th>
+                    <th className="py-1 pr-4">{t("colTotal")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoice.lineItems.map((item) => (
                     <tr key={item.id} className="border-b">
-                      <td className="py-1 pr-4">
-                        {new Date(item.date).toLocaleDateString()}
-                      </td>
+                      <td className="py-1 pr-4">{fmtDate(item.date)}</td>
                       <td className="py-1 pr-4">{item.description}</td>
                       <td className="py-1 pr-4">{item.hours.toString()}</td>
                       <td className="py-1 pr-4">{item.rate.toString()}</td>
                       <td className="py-1 pr-4">
-                        {(Number(item.hours) * Number(item.rate)).toFixed(2)}
+                        {fmtMoney(Number(item.hours) * Number(item.rate))}
                       </td>
                     </tr>
                   ))}
@@ -160,51 +171,45 @@ export default async function InvoiceViewPage({
             </div>
           ) : (
             <div className="text-sm">
-              <span className="text-gray-500">Project price:</span>{" "}
-              {invoice.currency} {Number(invoice.fixedPrice).toFixed(2)}
+              <span className="text-gray-500">{t("projectPrice")}</span>{" "}
+              {invoice.currency} {fmtMoney(Number(invoice.fixedPrice))}
             </div>
           )}
 
           <hr />
 
-          {/* Totals, including MVA breakdown when applicable — now
-              applies to both HOURLY and FIXED invoices, since the
-              underlying calculation handles both cases correctly. */}
+          {/* Totals, including MVA breakdown when applicable */}
           <div className="space-y-1 text-sm">
             {invoice.mvaRegisteredFrom &&
               (subtotalBefore > 0 || subtotalAfter > 0) && (
                 <>
                   {subtotalBefore > 0 && (
                     <p>
-                      Work before registration of 25% VAT — {invoice.currency}{" "}
-                      {subtotalBefore.toFixed(2)}{" "}
+                      {t("workBefore")} — {invoice.currency}{" "}
+                      {fmtMoney(subtotalBefore)}{" "}
                       <span className="text-gray-500">
-                        (over 50,000 NOK must be taxed)
+                        {t("workBeforeHint")}
                       </span>
                     </p>
                   )}
                   {subtotalAfter > 0 && (
                     <p>
-                      Work after registration of 25% VAT — {invoice.currency}{" "}
-                      {subtotalAfter.toFixed(2)}
+                      {t("workAfter")} — {invoice.currency}{" "}
+                      {fmtMoney(subtotalAfter)}
                     </p>
                   )}
                   <p>
-                    25% VAT = {invoice.currency} {vatAmount.toFixed(2)}
+                    {t("vat")} = {invoice.currency} {fmtMoney(vatAmount)}
                   </p>
                 </>
               )}
 
             {!invoice.mvaRegisteredFrom && (
-              <p className="text-gray-500 italic">
-                This invoice does not include VAT (MVA). VAT registration
-                will be added once revenue exceeds NOK 50,000 in a 12-month
-                period.
-              </p>
+              <p className="text-gray-500 italic">{t("noVat")}</p>
             )}
 
             <p className="text-lg font-semibold pt-2">
-              Total due: {invoice.currency} {grandTotal.toFixed(2)}
+              {t("totalDue")} {invoice.currency} {fmtMoney(grandTotal)}
             </p>
           </div>
 
@@ -212,11 +217,17 @@ export default async function InvoiceViewPage({
 
           {/* Payment details */}
           <div className="text-sm space-y-1">
-            <p className="font-medium mb-1">Payment details</p>
-            <p>IBAN / account: {invoice.ibanOrAccount}</p>
+            <p className="font-medium mb-1">{t("paymentDetails")}</p>
+            <p>
+              {t("account")} {invoice.ibanOrAccount}
+            </p>
             {invoice.bic && <p>BIC/SWIFT: {invoice.bic}</p>}
-            <p>Bank: {invoice.bankName}</p>
-            <p>Currency: {invoice.currency}</p>
+            <p>
+              {t("bank")} {invoice.bankName}
+            </p>
+            <p>
+              {t("currency")} {invoice.currency}
+            </p>
           </div>
         </div>
       </main>

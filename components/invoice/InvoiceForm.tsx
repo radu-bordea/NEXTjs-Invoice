@@ -56,6 +56,9 @@ export function InvoiceForm({
   const tBilling = useTranslations("BillingType");
   const format = useFormatter();
 
+  const te = useTranslations("Errors");
+  const tr = (m?: string) => (m && te.has(m) ? te(m) : m);
+
   const isEditMode = Boolean(invoice);
   const source = invoice ?? template;
 
@@ -174,14 +177,12 @@ export function InvoiceForm({
           />
           {state.errors?.clientName && (
             <p className="text-sm text-red-600 mt-1">
-              {state.errors.clientName[0]}
+              {tr(state.errors.clientName[0])}
             </p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
-            {t("orgNr")}
-          </label>
+          <label className="block text-sm font-medium mb-1">{t("orgNr")}</label>
           <input
             name="clientOrgNr"
             value={clientFields.clientOrgNr}
@@ -206,14 +207,12 @@ export function InvoiceForm({
           />
           {state.errors?.clientAddress && (
             <p className="text-sm text-red-600 mt-1">
-              {state.errors.clientAddress[0]}
+              {tr(state.errors.clientAddress[0])}
             </p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
-            {t("email")}
-          </label>
+          <label className="block text-sm font-medium mb-1">{t("email")}</label>
           <input
             name="clientEmail"
             type="email"
@@ -404,7 +403,9 @@ export function InvoiceForm({
           </p>
 
           {state.errors?.lineItems && (
-            <p className="text-sm text-red-600">{state.errors.lineItems[0]}</p>
+                        <p className="text-sm text-red-600">
+              {tr(state.errors.lineItems[0])}
+            </p>
           )}
 
           <input
@@ -449,11 +450,7 @@ export function InvoiceForm({
         disabled={isPending}
         className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
       >
-        {isPending
-          ? t("saving")
-          : isEditMode
-            ? t("saveChanges")
-            : t("create")}
+        {isPending ? t("saving") : isEditMode ? t("saveChanges") : t("create")}
       </button>
     </form>
   );
@@ -474,6 +471,8 @@ function Field({
   required?: boolean;
   defaultValue?: string;
 }) {
+  const te = useTranslations("Errors");
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1">
@@ -486,7 +485,11 @@ function Field({
         defaultValue={defaultValue ?? ""}
         className="w-full px-4 py-2 border rounded-lg"
       />
-      {error && <p className="text-sm text-red-600 mt-1">{error[0]}</p>}
+      {error && (
+        <p className="text-sm text-red-600 mt-1">
+          {te.has(error[0]) ? te(error[0]) : error[0]}
+        </p>
+      )}
     </div>
   );
 }

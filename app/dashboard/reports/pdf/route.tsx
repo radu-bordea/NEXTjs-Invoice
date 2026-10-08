@@ -4,7 +4,8 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportPDF } from "@/components/reports/ReportPDF";
 import { getMvaPeriod, getPeriodDateRange } from "@/lib/invoice-reports";
 import { NextResponse } from "next/server";
-import { isUserSubscribed } from "@/lib/subscription"
+import { isUserSubscribed } from "@/lib/subscription";
+import { getPdfI18n } from "@/lib/pdf-i18n";
 
 export async function GET(request: Request) {
   const { userId } = await auth();
@@ -13,8 +14,8 @@ export async function GET(request: Request) {
   }
 
   if (!(await isUserSubscribed(userId))) {
-  return new NextResponse("Pro subscription required", { status: 403 })
-}
+    return new NextResponse("Pro subscription required", { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const yearParam = searchParams.get("year");
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
   const invoices = await prisma.invoice.findMany({
     where: {
       userId,
-      status: { in: ["SENT", "PAID"] }, // NEW
+      status: { in: ["SENT", "PAID"] },
       invoiceDate: {
         gte: dateRange.start,
         lt: dateRange.end,
@@ -45,15 +46,22 @@ export async function GET(request: Request) {
     orderBy: { invoiceDate: "asc" },
   });
 
+  const { t, getT, dateLocale } = await getPdfI18n("ReportPDF");
+  const tReports = getT("Reports");
+  const tStatus = getT("Status");
+
   const periodLabel = selectedPeriod
-    ? `${selectedPeriod.label} ${year}`
-    : `Full year ${year}`;
+    ? `${tReports(`periods.${selectedPeriod.id}`)} ${year}`
+    : t("fullYear", { year });
 
   const pdfBuffer = await renderToBuffer(
     <ReportPDF
       invoices={invoices}
       periodLabel={periodLabel}
       generatedAt={new Date()}
+      t={t}
+      tStatus={tStatus}
+      dateLocale={dateLocale}
     />,
   );
 

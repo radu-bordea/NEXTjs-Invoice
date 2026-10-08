@@ -2,11 +2,12 @@ import { auth } from "@clerk/nextjs/server"
 import prisma from "@/lib/prisma"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { InvoicePDF } from "@/components/invoice/InvoicePDF"
+import { getPdfI18n } from "@/lib/pdf-i18n"
 import { NextResponse } from "next/server"
 
 /**
  * Serves a generated PDF for the given invoice.
- * Opens inline in the browser's native PDF viewer.
+ * The language follows the user's selected language (cookie).
  */
 export async function GET(
   _request: Request,
@@ -34,8 +35,10 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 })
   }
 
+  const { t, dateLocale } = await getPdfI18n("InvoicePDF")
+
   const pdfBuffer = await renderToBuffer(
-    <InvoicePDF invoice={invoice} />
+    <InvoicePDF invoice={invoice} t={t} dateLocale={dateLocale} />
   )
 
   return new NextResponse(new Uint8Array(pdfBuffer), {

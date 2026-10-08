@@ -10,6 +10,7 @@
 - npm install sonner
 - npm install recharts
 - npm install stripe
+- npm install @clerk/localizations
 
 # files
 - find app -type f

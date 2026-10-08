@@ -5,10 +5,10 @@ import { z } from "zod"
  * Used only when billingType is HOURLY; ignored for FIXED invoices.
  */
 const workLogItemSchema = z.object({
-  date: z.string().min(1, "Date is required"),
-  description: z.string().min(1, "Description is required"),
-  hours: z.coerce.number().positive("Hours must be greater than 0"),
-  rate: z.coerce.number().positive("Rate must be greater than 0"),
+  date: z.string().min(1, "dateRequired"),
+  description: z.string().min(1, "descriptionRequired"),
+  hours: z.coerce.number().positive("hoursPositive"),
+  rate: z.coerce.number().positive("ratePositive"),
 })
 
 /**
@@ -18,20 +18,20 @@ const workLogItemSchema = z.object({
  * unions get awkward with FormData's flat string/array shape.
  */
 const baseInvoiceSchema = z.object({
-  invoiceNumber: z.string().min(1, "Invoice number is required"),
-  invoiceDate: z.string().min(1, "Invoice date is required"),
-  dueDate: z.string().min(1, "Due date is required"),
+  invoiceNumber: z.string().min(1, "invoiceNumberRequired"),
+  invoiceDate: z.string().min(1, "invoiceDateRequired"),
+  dueDate: z.string().min(1, "dueDateRequired"),
   periodStart: z.string().optional(),
   periodEnd: z.string().optional(),
   projectRef: z.string().optional(),
 
-  clientName: z.string().min(1, "Client name is required"),
+  clientName: z.string().min(1, "clientNameRequired"),
   clientOrgNr: z.string().optional(),
-  clientAddress: z.string().min(1, "Client address is required"),
-  clientEmail: z.email("Invalid email address").optional().or(z.literal("")),
+  clientAddress: z.string().min(1, "clientAddressRequired"),
+  clientEmail: z.email("emailInvalid").optional().or(z.literal("")),
 
   billingType: z.enum(["HOURLY", "FIXED"]),
-  fixedPrice: z.coerce.number().positive().optional(),
+  fixedPrice: z.coerce.number().positive("fixedPricePositive").optional(),
   currency: z.literal("NOK").default("NOK"),
 
   lineItems: z.array(workLogItemSchema).optional(),
@@ -51,7 +51,7 @@ export const invoiceSchema = baseInvoiceSchema.superRefine((data, ctx) => {
     if (!data.lineItems || data.lineItems.length === 0) {
       ctx.addIssue({
         code: "custom",
-        message: "Add at least one work log entry for an hourly invoice",
+        message: "lineItemsRequired",
         path: ["lineItems"],
       })
     }
@@ -61,7 +61,7 @@ export const invoiceSchema = baseInvoiceSchema.superRefine((data, ctx) => {
     if (!data.fixedPrice) {
       ctx.addIssue({
         code: "custom",
-        message: "Fixed price is required for a fixed-price invoice",
+        message: "fixedPriceRequired",
         path: ["fixedPrice"],
       })
     }

@@ -7,6 +7,7 @@ import {
 } from "@react-pdf/renderer"
 import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations"
+import type { PdfT } from "@/lib/pdf-i18n"
 
 /**
  * React-PDF styles. Unlike Tailwind, this is a JS object passed to
@@ -93,11 +94,18 @@ const styles = StyleSheet.create({
  * actual PDF document, not HTML. Mirrors the same data and
  * calculations shown on the on-screen View page, using the same
  * shared calculateInvoiceTotals helper so the numbers always match.
+ *
+ * Texts come from the `t` translator and dates/numbers are formatted
+ * with `dateLocale`, both prepared by getPdfI18n() in the route.
  */
 export function InvoicePDF({
   invoice,
+  t,
+  dateLocale,
 }: {
   invoice: Invoice & { lineItems: WorkLogItem[] }
+  t: PdfT
+  dateLocale: string
 }) {
   const { subtotalBefore, subtotalAfter, vatAmount, grandTotal } =
     calculateInvoiceTotals({
@@ -108,11 +116,24 @@ export function InvoicePDF({
       invoiceDate: invoice.invoiceDate,
     })
 
+  const fmtDate = (d: Date | string) =>
+    new Date(d).toLocaleDateString(dateLocale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+  const fmtMoney = (n: number) =>
+    n.toLocaleString(dateLocale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <Text style={styles.title}>
-          INVOICE: {invoice.projectRef} - {invoice.invoiceNumber}
+          {t("title")}: {invoice.projectRef ? `${invoice.projectRef} - ` : ""}
+          {invoice.invoiceNumber}
         </Text>
         <View style={styles.divider} />
 
@@ -122,15 +143,21 @@ export function InvoicePDF({
             <Text style={[styles.bold, { marginBottom: 4 }]}>
               {invoice.issuerName}
             </Text>
-            <Text>Org.nr: {invoice.issuerOrgNr}</Text>
+            <Text>
+              {t("orgNr")}: {invoice.issuerOrgNr}
+            </Text>
             <Text>{invoice.issuerAddress}</Text>
             <Text>{invoice.issuerPhone}</Text>
             <Text>{invoice.issuerEmail}</Text>
           </View>
           <View style={styles.column}>
-            <Text style={styles.label}>Bill To:</Text>
+            <Text style={styles.label}>{t("billTo")}</Text>
             <Text style={styles.bold}>{invoice.clientName}</Text>
-            {invoice.clientOrgNr && <Text>Org.nr: {invoice.clientOrgNr}</Text>}
+            {invoice.clientOrgNr && (
+              <Text>
+                {t("orgNr")}: {invoice.clientOrgNr}
+              </Text>
+            )}
             <Text>{invoice.clientAddress}</Text>
             {invoice.clientEmail && <Text>{invoice.clientEmail}</Text>}
           </View>
@@ -140,21 +167,24 @@ export function InvoicePDF({
 
         {/* Invoice meta */}
         <Text style={[styles.bold, { marginBottom: 4 }]}>
-          Invoice Number: {invoice.invoiceNumber}
+          {t("invoiceNumber")}: {invoice.invoiceNumber}
         </Text>
         <Text>
-          Invoice Date: {new Date(invoice.invoiceDate).toLocaleDateString()}
+          {t("invoiceDate")}: {fmtDate(invoice.invoiceDate)}
         </Text>
-        <Text>Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</Text>
+        <Text>
+          {t("dueDate")}: {fmtDate(invoice.dueDate)}
+        </Text>
         {invoice.periodStart && invoice.periodEnd && (
           <Text>
-            Period of Work:{" "}
-            {new Date(invoice.periodStart).toLocaleDateString()} –{" "}
-            {new Date(invoice.periodEnd).toLocaleDateString()}
+            {t("period")}: {fmtDate(invoice.periodStart)} –{" "}
+            {fmtDate(invoice.periodEnd)}
           </Text>
         )}
         {invoice.projectRef && (
-          <Text>Project Reference: {invoice.projectRef}</Text>
+          <Text>
+            {t("projectRef")}: {invoice.projectRef}
+          </Text>
         )}
 
         <View style={styles.divider} />
@@ -162,29 +192,35 @@ export function InvoicePDF({
         {/* Work log or fixed price */}
         {invoice.billingType === "HOURLY" ? (
           <View>
-            <Text style={styles.sectionTitle}>Work Log</Text>
+            <Text style={styles.sectionTitle}>{t("workLog")}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeaderRow}>
-                <Text style={[styles.colDate, styles.bold]}>Date</Text>
-                <Text style={[styles.colDescription, styles.bold]}>
-                  Description
+                <Text style={[styles.colDate, styles.bold]}>
+                  {t("colDate")}
                 </Text>
-                <Text style={[styles.colHours, styles.bold]}>Hours</Text>
-                <Text style={[styles.colRate, styles.bold]}>Rate</Text>
-                <Text style={[styles.colTotal, styles.bold]}>Total</Text>
+                <Text style={[styles.colDescription, styles.bold]}>
+                  {t("colDescription")}
+                </Text>
+                <Text style={[styles.colHours, styles.bold]}>
+                  {t("colHours")}
+                </Text>
+                <Text style={[styles.colRate, styles.bold]}>
+                  {t("colRate")}
+                </Text>
+                <Text style={[styles.colTotal, styles.bold]}>
+                  {t("colTotal")}
+                </Text>
               </View>
               {invoice.lineItems.map((item) => (
                 <View style={styles.tableRow} key={item.id}>
-                  <Text style={styles.colDate}>
-                    {new Date(item.date).toLocaleDateString()}
-                  </Text>
+                  <Text style={styles.colDate}>{fmtDate(item.date)}</Text>
                   <Text style={styles.colDescription}>
                     {item.description}
                   </Text>
                   <Text style={styles.colHours}>{item.hours.toString()}</Text>
                   <Text style={styles.colRate}>{item.rate.toString()}</Text>
                   <Text style={styles.colTotal}>
-                    {(Number(item.hours) * Number(item.rate)).toFixed(2)}
+                    {fmtMoney(Number(item.hours) * Number(item.rate))}
                   </Text>
                 </View>
               ))}
@@ -192,8 +228,8 @@ export function InvoicePDF({
           </View>
         ) : (
           <Text>
-            Project price: {invoice.currency}{" "}
-            {Number(invoice.fixedPrice).toFixed(2)}
+            {t("projectPrice")}: {invoice.currency}{" "}
+            {fmtMoney(Number(invoice.fixedPrice))}
           </Text>
         )}
 
@@ -208,32 +244,28 @@ export function InvoicePDF({
               <>
                 {subtotalBefore > 0 && (
                   <Text>
-                    Work before registration of 25% VAT — {invoice.currency}{" "}
-                    {subtotalBefore.toFixed(2)} (over 50,000 NOK must be
-                    taxed)
+                    {t("workBefore")} — {invoice.currency}{" "}
+                    {fmtMoney(subtotalBefore)} {t("workBeforeHint")}
                   </Text>
                 )}
                 {subtotalAfter > 0 && (
                   <Text>
-                    Work after registration of 25% VAT — {invoice.currency}{" "}
-                    {subtotalAfter.toFixed(2)}
+                    {t("workAfter")} — {invoice.currency}{" "}
+                    {fmtMoney(subtotalAfter)}
                   </Text>
                 )}
                 <Text>
-                  25% VAT = {invoice.currency} {vatAmount.toFixed(2)}
+                  {t("vat")} = {invoice.currency} {fmtMoney(vatAmount)}
                 </Text>
               </>
             )}
 
           {!invoice.mvaRegisteredFrom && (
-            <Text style={styles.italic}>
-              This invoice does NOT include VAT (MVA). VAT registration will
-              be added once revenue exceeds NOK 50,000 in a 12-month period.
-            </Text>
+            <Text style={styles.italic}>{t("noVat")}</Text>
           )}
 
           <Text style={styles.grandTotal}>
-            Total Due: {invoice.currency} {grandTotal.toFixed(2)}
+            {t("totalDue")}: {invoice.currency} {fmtMoney(grandTotal)}
           </Text>
         </View>
 
@@ -242,19 +274,22 @@ export function InvoicePDF({
         {/* Payment details */}
         <View>
           <Text style={[styles.bold, { marginBottom: 4 }]}>
-            Payment Details:
+            {t("paymentDetails")}:
           </Text>
-          <Text>IBAN / Account: {invoice.ibanOrAccount}</Text>
+          <Text>
+            {t("account")}: {invoice.ibanOrAccount}
+          </Text>
           {invoice.bic && <Text>BIC/SWIFT: {invoice.bic}</Text>}
-          <Text>Bank: {invoice.bankName}</Text>
-          <Text>Currency: {invoice.currency}</Text>
+          <Text>
+            {t("bank")}: {invoice.bankName}
+          </Text>
+          <Text>
+            {t("currency")}: {invoice.currency}
+          </Text>
         </View>
 
         <View style={styles.divider} />
-        <Text style={styles.italic}>
-          Tax on income is the responsibility of the business owner and is
-          not included in the invoice amount.
-        </Text>
+        <Text style={styles.italic}>{t("taxNote")}</Text>
       </Page>
     </Document>
   )

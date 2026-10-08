@@ -9,6 +9,7 @@ import {
 } from "@/lib/invoice-reports";
 import { RevenueChart } from "@/components/reports/RevenueChart";
 import Link from "next/link";
+import { getFormatter, getTranslations } from "next-intl/server";
 
 import { isUserSubscribed } from "@/lib/subscription";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
@@ -24,13 +25,25 @@ export default async function ReportsPage({
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  const t = await getTranslations("Reports");
+  const format = await getFormatter();
+
+  const fmtNok = (n: number) =>
+    "NOK " + format.number(n, { maximumFractionDigits: 0 });
+  const fmtDate = (d: Date | string) =>
+    format.dateTime(new Date(d), {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
   if (!(await isUserSubscribed(userId))) {
     return (
       <main className="p-4 sm:p-8 max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Reports</h1>
+        <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
         <UpgradePrompt
-          title="Reports are a Pro feature"
-          message="Upgrade to Pro to see revenue by month, MVA per period and download Skatteetaten-ready PDF reports."
+          title={t("lockedTitle")}
+          message={t("lockedMessage")}
         />
       </main>
     );
@@ -52,7 +65,7 @@ export default async function ReportsPage({
   const invoices = await prisma.invoice.findMany({
     where: {
       userId,
-      status: { in: ["SENT", "PAID"] }, // NEW
+      status: { in: ["SENT", "PAID"] },
       invoiceDate: {
         gte: dateRange.start,
         lt: dateRange.end,
@@ -74,7 +87,7 @@ export default async function ReportsPage({
   return (
     <main className="p-4 sm:p-8 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-        <h1 className="text-2xl font-bold">Reports</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex flex-wrap gap-2">
             {yearOptions.map((y) => (
@@ -93,7 +106,7 @@ export default async function ReportsPage({
       MVA filing terms, alongside an "All year" option */}
       <div className="flex flex-wrap gap-2 mb-8">
         <PeriodLink
-          label="All year"
+          label={t("allYear")}
           periodId={undefined}
           year={year}
           isActive={!selectedPeriod}
@@ -101,7 +114,7 @@ export default async function ReportsPage({
         {MVA_PERIODS.map((p) => (
           <PeriodLink
             key={p.id}
-            label={p.label}
+            label={t(`periods.${p.id}`)}
             periodId={p.id}
             year={year}
             isActive={selectedPeriod?.id === p.id}
@@ -111,50 +124,62 @@ export default async function ReportsPage({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <SummaryCard
-          label="Total billed"
-          value={summary.billedTotal}
-          hint="Sent and paid invoices"
+          label={t("totalBilled")}
+          value={fmtNok(summary.billedTotal)}
+          hint={t("totalBilledHint")}
         />
         <SummaryCard
-          label="Total received"
-          value={summary.paidTotal}
-          hint="Paid invoices only"
+          label={t("totalReceived")}
+          value={fmtNok(summary.paidTotal)}
+          hint={t("totalReceivedHint")}
           variant="highlight"
         />
         <SummaryCard
-          label="VAT collected"
-          value={summary.vatCollected}
-          hint="From sent and paid invoices"
+          label={t("vatCollected")}
+          value={fmtNok(summary.vatCollected)}
+          hint={t("vatCollectedHint")}
           variant="warning"
         />
       </div>
 
       <div className="rounded-lg border p-6 mb-6">
         <h2 className="text-sm font-medium text-gray-500 mb-4">
-          Revenue by month — {year}
-          {selectedPeriod ? ` (${selectedPeriod.label})` : ""}
+          {t("revenueByMonth", { year })}
+          {selectedPeriod ? ` (${t(`periods.${selectedPeriod.id}`)})` : ""}
         </h2>
         <RevenueChart data={monthly} />
       </div>
 
       <div className="rounded-lg border p-6">
         <h2 className="text-sm font-medium text-gray-500 mb-4">
-          Invoices in this period
+          {t("invoicesInPeriod")}
         </h2>
 
         {invoices.length === 0 ? (
-          <p className="text-gray-500 text-sm">No invoices in this period.</p>
+          <p className="text-gray-500 text-sm">{t("noInvoices")}</p>
         ) : (
           <div className="w-full overflow-x-auto">
             <table className="w-full min-w-[600px] text-sm border-collapse text-left">
               <thead>
                 <tr className="text-left border-b">
-                  <th className="py-2 px-3 whitespace-nowrap">Invoice #</th>
-                  <th className="py-2 px-3 whitespace-nowrap">Client</th>
-                  <th className="py-2 px-3 whitespace-nowrap">Date</th>
-                  <th className="py-2 px-3 whitespace-nowrap">Status</th>
-                  <th className="py-2 px-3 whitespace-nowrap">Amount</th>
-                  <th className="py-2 px-3 whitespace-nowrap">VAT</th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colInvoice")}
+                  </th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colClient")}
+                  </th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colDate")}
+                  </th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colStatus")}
+                  </th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colAmount")}
+                  </th>
+                  <th className="py-2 px-3 whitespace-nowrap">
+                    {t("colVat")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -184,22 +209,16 @@ export default async function ReportsPage({
                         {invoice.clientName}
                       </td>
                       <td className="py-2 px-3 whitespace-nowrap">
-                        {new Date(invoice.invoiceDate).toLocaleDateString()}
+                        {fmtDate(invoice.invoiceDate)}
                       </td>
                       <td className="py-2 px-3 whitespace-nowrap">
                         <StatusBadge status={invoice.status} />
                       </td>
                       <td className="py-2 px-3 whitespace-nowrap">
-                        NOK{" "}
-                        {grandTotal.toLocaleString("nb-NO", {
-                          maximumFractionDigits: 0,
-                        })}
+                        {fmtNok(grandTotal)}
                       </td>
                       <td className="py-2 px-3 whitespace-nowrap">
-                        NOK{" "}
-                        {vatAmount.toLocaleString("nb-NO", {
-                          maximumFractionDigits: 0,
-                        })}
+                        {fmtNok(vatAmount)}
                       </td>
                     </tr>
                   );
@@ -208,12 +227,11 @@ export default async function ReportsPage({
               <tfoot>
                 <tr className="border-t-2 font-semibold">
                   <td className="py-2 px-3" colSpan={4}>
-                    Total
+                    {t("total")}
                   </td>
                   <td className="py-2 px-3 whitespace-nowrap">
-                    NOK{" "}
-                    {invoices
-                      .reduce((sum, invoice) => {
+                    {fmtNok(
+                      invoices.reduce((sum, invoice) => {
                         const { grandTotal } = calculateInvoiceTotals({
                           billingType: invoice.billingType,
                           fixedPrice: invoice.fixedPrice
@@ -224,13 +242,12 @@ export default async function ReportsPage({
                           invoiceDate: invoice.invoiceDate,
                         });
                         return sum + grandTotal;
-                      }, 0)
-                      .toLocaleString("nb-NO", { maximumFractionDigits: 0 })}
+                      }, 0),
+                    )}
                   </td>
                   <td className="py-2 px-3 whitespace-nowrap">
-                    NOK{" "}
-                    {invoices
-                      .reduce((sum, invoice) => {
+                    {fmtNok(
+                      invoices.reduce((sum, invoice) => {
                         const { vatAmount } = calculateInvoiceTotals({
                           billingType: invoice.billingType,
                           fixedPrice: invoice.fixedPrice
@@ -241,8 +258,8 @@ export default async function ReportsPage({
                           invoiceDate: invoice.invoiceDate,
                         });
                         return sum + vatAmount;
-                      }, 0)
-                      .toLocaleString("nb-NO", { maximumFractionDigits: 0 })}
+                      }, 0),
+                    )}
                   </td>
                 </tr>
               </tfoot>
@@ -255,13 +272,16 @@ export default async function ReportsPage({
           download={`report-${selectedPeriod ? selectedPeriod.id : "year-" + year}.pdf`}
           className="inline-block bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors cursor-pointer"
         >
-          Download PDF
+          {t("downloadPdf")}
         </Link>
       </div>
     </main>
   );
 }
 
+/**
+ * `value` is already formatted by the page (NOK + locale number format).
+ */
 function SummaryCard({
   label,
   value,
@@ -269,7 +289,7 @@ function SummaryCard({
   variant = "default",
 }: {
   label: string;
-  value: number;
+  value: string;
   hint: string;
   variant?: "default" | "highlight" | "warning";
 }) {
@@ -287,13 +307,10 @@ function SummaryCard({
         ? "text-2xl font-bold text-red-800"
         : "text-2xl font-bold";
 
-  const formattedValue =
-    "NOK " + value.toLocaleString("nb-NO", { maximumFractionDigits: 0 });
-
   return (
     <div className={cardClass}>
       <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className={valueClass}>{formattedValue}</p>
+      <p className={valueClass}>{value}</p>
       <p className="text-xs text-gray-400 mt-1">{hint}</p>
     </div>
   );

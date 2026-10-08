@@ -21,7 +21,7 @@
     "subtitle": "Create professional invoices, track hours or fixed-price projects, and download Skatteetaten-ready PDFs in minutes — no spreadsheets, no Google Docs templates.",
     "cta": "Go to Dashboard",
     "norwayTitle": "Built for Norway",
-    "norwayText": "Org.nr, MVA thresholds, and IBAN/KID fields — set up the way Skatteetaten expects.",
+    "norwayText": "Org.nr, MVA thresholds, and IBAN fields — set up the way Skatteetaten expects.",
     "billingTitle": "Hourly or fixed price",
     "billingText": "Log hours against a rate, or bill a flat project price — switch per invoice.",
     "draftTitle": "Draft, edit, download",
@@ -127,5 +127,412 @@
     "saving": "Saving...",
     "saveChanges": "Save changes",
     "create": "Create invoice"
+  },
+  "NewInvoice": {
+    "title": "New invoice",
+    "limitTitle": "You've used your {limit} free invoices this month",
+    "limitMessage": "Upgrade to Pro for unlimited invoices, email delivery and Skatteetaten reports. Your limit resets on the 1st.",
+    "usage": "{used} of {limit} free invoices used this month"
+  },
+  "EditInvoice": {
+    "title": "Edit invoice {number}"
+  },
+  "InvoiceView": {
+    "title": "Invoice {number}",
+    "edit": "Edit",
+    "downloadPdf": "Download PDF",
+    "from": "From",
+    "billTo": "Bill to",
+    "orgNr": "Org.nr",
+    "invoiceDate": "Invoice date:",
+    "dueDate": "Due date:",
+    "period": "Period:",
+    "projectRef": "Project reference:",
+    "workLog": "Work log",
+    "colDate": "Date",
+    "colDescription": "Description",
+    "colHours": "Hours",
+    "colRate": "Rate",
+    "colTotal": "Total",
+    "projectPrice": "Project price:",
+    "workBefore": "Work before registration of 25% VAT",
+    "workBeforeHint": "(over 50,000 NOK must be taxed)",
+    "workAfter": "Work after registration of 25% VAT",
+    "vat": "25% VAT",
+    "noVat": "This invoice does not include VAT (MVA). VAT registration will be added once revenue exceeds NOK 50,000 in a 12-month period.",
+    "totalDue": "Total due:",
+    "paymentDetails": "Payment details",
+    "account": "IBAN / account:",
+    "bank": "Bank:",
+    "currency": "Currency:"
+  },
+  "StatusButtons": {
+    "markSent": "Mark as sent",
+    "markPaid": "Mark as paid",
+    "revert": "Revert to draft",
+    "paidNote": "✓ This invoice is marked as paid.",
+    "confirmSent": "Mark this invoice as sent? This means it's been delivered to the client.",
+    "confirmPaid": "Mark this invoice as paid? This is a final status and cannot be undone.",
+    "confirmRevert": "Revert this invoice back to draft? It will no longer be marked as sent."
+  },
+  "ViewNotice": {
+    "editBlockedTitle": "Only draft invoices can be edited.",
+    "editBlockedDescription": "This invoice has already been sent or paid."
+  },
+  "CompanyProfile": {
+    "title": "Company profile",
+    "companyName": "Company name",
+    "orgNr": "Org.nr",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "mvaFrom": "MVA registered from",
+    "mvaFromHint": "MVA registered from (leave empty if not yet registered)",
+    "notRegistered": "Not registered",
+    "account": "IBAN / account number",
+    "bic": "BIC/SWIFT",
+    "bicOptional": "BIC/SWIFT (optional)",
+    "bankName": "Bank name",
+    "edit": "Edit profile",
+    "save": "Save profile",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "fixErrors": "Please fix the errors below.",
+    "saved": "Company profile saved successfully."
+  },
+  "Reports": {
+    "title": "Reports",
+    "lockedTitle": "Reports are a Pro feature",
+    "lockedMessage": "Upgrade to Pro to see revenue by month, MVA per period and download Skatteetaten-ready PDF reports.",
+    "allYear": "All year",
+    "totalBilled": "Total billed",
+    "totalBilledHint": "Sent and paid invoices",
+    "totalReceived": "Total received",
+    "totalReceivedHint": "Paid invoices only",
+    "vatCollected": "VAT collected",
+    "vatCollectedHint": "From sent and paid invoices",
+    "revenueByMonth": "Revenue by month — {year}",
+    "invoicesInPeriod": "Invoices in this period",
+    "noInvoices": "No invoices in this period.",
+    "colInvoice": "Invoice #",
+    "colClient": "Client",
+    "colDate": "Date",
+    "colStatus": "Status",
+    "colAmount": "Amount",
+    "colVat": "VAT",
+    "total": "Total",
+    "downloadPdf": "Download PDF",
+    "billed": "Billed",
+    "paid": "Paid",
+    "periods": {
+      "jan-feb": "Jan–Feb",
+      "mar-apr": "Mar–Apr",
+      "may-jun": "May–Jun",
+      "jul-aug": "Jul–Aug",
+      "sep-oct": "Sep–Oct",
+      "nov-dec": "Nov–Dec"
+    },
+    "months": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "May",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Aug",
+      "9": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    }
+  },
+  "Errors": {
+    "nameRequired": "Company name is required",
+    "orgNrInvalid": "Org.nr must be exactly 9 digits",
+    "addressRequired": "Address is required",
+    "phoneRequired": "Phone is required",
+    "phoneInvalid": "Phone must contain only numbers, spaces, and an optional leading +",
+    "emailInvalid": "Invalid email address",
+    "accountRequired": "IBAN or account number is required",
+    "bankNameRequired": "Bank name is required",
+    "dateRequired": "Date is required",
+    "descriptionRequired": "Description is required",
+    "hoursPositive": "Hours must be greater than 0",
+    "ratePositive": "Rate must be greater than 0",
+    "invoiceNumberRequired": "Invoice number is required",
+    "invoiceDateRequired": "Invoice date is required",
+    "dueDateRequired": "Due date is required",
+    "clientNameRequired": "Client name is required",
+    "clientAddressRequired": "Client address is required",
+    "lineItemsRequired": "Add at least one work log entry for an hourly invoice",
+    "fixedPriceRequired": "Fixed price is required for a fixed-price invoice",
+    "fixedPricePositive": "Fixed price must be greater than 0"
+  },
+  "InvoiceActions": {
+    "quotaReached": "Free plan limit reached: {limit} invoices per month. Upgrade to Pro for unlimited invoices.",
+    "profileRequired": "Please complete your company profile before creating an invoice.",
+    "invalidLineItems": "Invalid line items data.",
+    "fixErrors": "Please fix the errors below.",
+    "notFound": "Invoice not found.",
+    "onlyDrafts": "Only draft invoices can be edited."
+  },
+  "InvoicePDF": {
+    "title": "INVOICE",
+    "orgNr": "Org.nr",
+    "billTo": "Bill to:",
+    "invoiceNumber": "Invoice number",
+    "invoiceDate": "Invoice date",
+    "dueDate": "Due date",
+    "period": "Period of work",
+    "projectRef": "Project reference",
+    "workLog": "Work log",
+    "colDate": "Date",
+    "colDescription": "Description",
+    "colHours": "Hours",
+    "colRate": "Rate",
+    "colTotal": "Total",
+    "projectPrice": "Project price",
+    "workBefore": "Work before registration of 25% VAT",
+    "workBeforeHint": "(over 50,000 NOK must be taxed)",
+    "workAfter": "Work after registration of 25% VAT",
+    "vat": "25% VAT",
+    "noVat": "This invoice does NOT include VAT (MVA). VAT registration will be added once revenue exceeds NOK 50,000 in a 12-month period.",
+    "totalDue": "Total due",
+    "paymentDetails": "Payment details",
+    "account": "IBAN / account",
+    "bank": "Bank",
+    "currency": "Currency",
+    "taxNote": "Tax on income is the responsibility of the business owner and is not included in the invoice amount."
+  },
+  "ReportPDF": {
+    "title": "Invoice Report",
+    "period": "Period",
+    "generated": "Generated",
+    "fullYear": "Full year {year}",
+    "colNumber": "Invoice #",
+    "colClient": "Client",
+    "colDate": "Date",
+    "colStatus": "Status",
+    "colAmount": "Amount (NOK)",
+    "colVat": "VAT (NOK)",
+    "noInvoices": "No invoices in this period.",
+    "total": "Total",
+    "footer": "Includes issued invoices (sent and paid) by invoice date; drafts are excluded. This is a personal reference summary generated from your own invoice records. It is not a substitute for filing your MVA return with Skatteetaten via Altinn."
+  },
+  "Legal": {
+    "lastUpdated": "Last updated: {date}"
+  },
+  "Terms": {
+    "title": "Terms of Service",
+    "intro": "These terms apply to your use of {service}. By creating an account or using the service, you accept these terms. Please read them carefully.",
+    "sections": [
+      {
+        "title": "The service and the parties",
+        "paragraphs": [
+          "{service} is an online service for creating, managing and downloading invoices. The service is provided by {name}, organisation number {orgNr}, a Norwegian sole proprietorship (“we”, “us”).",
+          "The agreement is between us and you, the person who creates an account (“you”). The service is designed for business users, such as freelancers and sole proprietors, and is to be used in the course of business."
+        ]
+      },
+      {
+        "title": "Account",
+        "items": [
+          "You must be at least 18 years old and legally able to enter into agreements.",
+          "You must provide accurate information and keep it up to date.",
+          "You are responsible for keeping your login secret and for activity on your account.",
+          "Tell us immediately if you suspect unauthorised use of your account."
+        ]
+      },
+      {
+        "title": "Plans and prices",
+        "paragraphs": [
+          "The service has two plans. We may develop the content of the plans over time, but we will not change the price of an ongoing subscription without notice (see section 4)."
+        ],
+        "items": [
+          "Free: up to 3 invoices per calendar month, company profile, client prefill and PDF download.",
+          "Pro: NOK 149 per month including MVA (VAT). Unlimited invoices, emailing invoices to clients (when the feature is available) and reports, including export for use with Skatteetaten."
+        ]
+      },
+      {
+        "title": "Payment and subscription",
+        "items": [
+          "Pro is paid monthly in advance through Stripe. We do not store your card details; they are handled by Stripe.",
+          "The subscription renews automatically every month until you cancel it.",
+          "You can cancel at any time via “Manage subscription” on the pricing page. The cancellation takes effect at the end of the current paid period, and you keep the Pro features until then.",
+          "Paid periods are not refunded, unless mandatory law requires otherwise.",
+          "We will give at least 30 days’ notice before changing the price of an ongoing subscription.",
+          "If a payment fails, access to Pro features may be suspended until the payment is resolved. The account then returns to the Free plan."
+        ]
+      },
+      {
+        "title": "Your responsibility for invoices, MVA and accounting",
+        "paragraphs": [
+          "You are solely responsible for the content of the invoices you create, for their accuracy, and for making sure they meet the requirements of applicable law, including the Norwegian Bookkeeping Act, the VAT Act and the Accounting Act.",
+          "{service} is a tool. It does not provide accounting, tax or legal advice. MVA calculations and reports are aids that you must check yourself. The reports are a personal overview and do not replace filing your MVA return with Skatteetaten through Altinn.",
+          "You are responsible for keeping accounting records in line with the Bookkeeping Act (normally for five years). Download and back up your invoices; the service is not an archive or accounting system."
+        ]
+      },
+      {
+        "title": "Your data",
+        "paragraphs": [
+          "You own the data you enter. You give us the right to store and process it, but only to provide the service to you.",
+          "Your invoices contain personal data about your clients. For that data you are the controller and we are the processor. See the Privacy Policy for details. If you need a separate data processing agreement, contact us at {email}."
+        ]
+      },
+      {
+        "title": "Acceptable use",
+        "paragraphs": ["You must not:"],
+        "items": [
+          "use the service for unlawful activity, fraud or issuing false invoices",
+          "attempt to gain unauthorised access to the service or to other people’s data, or disrupt its operation",
+          "get around the limits of the Free plan, for example by creating several accounts",
+          "resell the service or use it to build a competing service"
+        ]
+      },
+      {
+        "title": "Availability and changes",
+        "paragraphs": [
+          "We do our best to keep the service available and secure, but it is provided “as is”. We do not guarantee that it is always available or error-free, and we may suspend it temporarily for maintenance.",
+          "We may develop, change or remove features. If we discontinue the service, we will give you reasonable notice so you can download your data."
+        ]
+      },
+      {
+        "title": "Limitation of liability",
+        "paragraphs": [
+          "To the extent the law allows, we are not liable for indirect losses, such as lost income, lost profit, loss of data or consequential damage, and we are not liable for errors caused by the information you entered yourself.",
+          "Our total liability to you is limited to the amount you have paid us in the 12 months before the claim arose.",
+          "These limitations do not apply in cases of intent or gross negligence, or where mandatory law requires otherwise."
+        ]
+      },
+      {
+        "title": "Termination and account deletion",
+        "paragraphs": [
+          "You can stop using the service at any time, and you can ask us to delete your account and data by contacting us at {email}.",
+          "We may suspend or terminate your account if you materially breach these terms. Where possible we will notify you first and give you the chance to retrieve your data.",
+          "What happens to your data after deletion is described in the Privacy Policy."
+        ]
+      },
+      {
+        "title": "Changes to these terms",
+        "paragraphs": [
+          "We may update these terms. For material changes we will notify you by email or in the service at least 30 days before they take effect. If you keep using the service after that, you accept the new terms. You can always cancel your subscription before the changes take effect."
+        ]
+      },
+      {
+        "title": "Governing law and disputes",
+        "paragraphs": [
+          "These terms are governed by Norwegian law. Disputes shall first be sought resolved amicably, and otherwise be decided by the Norwegian courts. Any mandatory rights you have under law are not affected."
+        ]
+      },
+      {
+        "title": "Contact",
+        "paragraphs": [
+          "{name} (org. no. {orgNr})",
+          "{address}",
+          "Email: {email}"
+        ]
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "intro": "This Privacy Policy explains how {name} processes personal data when you use {service}. We process data in accordance with the General Data Protection Regulation (GDPR) and the Norwegian Personal Data Act.",
+    "sections": [
+      {
+        "title": "Data controller",
+        "paragraphs": [
+          "{name}, org. no. {orgNr}, {address}. Contact: {email}.",
+          "For your own account data we are the data controller. For personal data about your clients that you enter into invoices, you are the data controller and we are the data processor."
+        ]
+      },
+      {
+        "title": "What data we process",
+        "items": [
+          "Account data: email address, name and user ID, handled by the sign-in provider Clerk.",
+          "Company profile: company name, organisation number, address, phone, email, bank details (IBAN or account number, BIC/SWIFT, bank name) and the date of any MVA registration.",
+          "Invoice data: your clients’ names, organisation numbers, addresses and emails, as well as descriptions, hours, prices and amounts.",
+          "Subscription data: Stripe customer ID, subscription status and period. We do not store card numbers; card details are handled by Stripe.",
+          "Technical data: IP address, browser type and time in server logs at our hosting provider, and your language choice (see section 7)."
+        ]
+      },
+      {
+        "title": "Purposes and legal basis",
+        "paragraphs": [
+          "We use the data for the purposes below. We do not sell data, and we do not use it for advertising or profiling."
+        ],
+        "items": [
+          "Providing the service, including storing and showing your invoices (contract, GDPR Art. 6(1)(b)).",
+          "Handling payment and subscriptions and meeting accounting and bookkeeping obligations (contract and legal obligation, Art. 6(1)(b) and (c)).",
+          "Securing the service, preventing misuse and troubleshooting (legitimate interest, Art. 6(1)(f)).",
+          "Responding to your enquiries (contract or legitimate interest)."
+        ]
+      },
+      {
+        "title": "Processors and recipients",
+        "paragraphs": [
+          "We use the providers below to run the service. They process data only to deliver their part of the service, and we have agreements in place that meet the requirements of the GDPR. We do not otherwise share your data with anyone, unless we are legally required to."
+        ],
+        "items": [
+          "Clerk: sign-in and user accounts",
+          "Neon: database storage",
+          "Vercel: hosting and delivery of the website",
+          "Stripe: payments and subscriptions",
+          "Resend: sending email (when the feature is enabled)"
+        ]
+      },
+      {
+        "title": "Transfers outside the EEA",
+        "paragraphs": [
+          "Some of our providers process data in the United States or other countries outside the EEA. Transfers are made on the basis of the European Commission’s Standard Contractual Clauses (SCCs) and/or the EU–US Data Privacy Framework, so that the data receives an equivalent level of protection."
+        ]
+      },
+      {
+        "title": "Storage and deletion",
+        "items": [
+          "We store your data for as long as you have an account.",
+          "You can ask us to delete your account and data by contacting us at {email}. We delete it within 30 days, except for data we are required to keep, for example payment information under the Bookkeeping Act (normally five years).",
+          "Backups are overwritten shortly after deletion."
+        ]
+      },
+      {
+        "title": "Cookies",
+        "paragraphs": [
+          "We only use necessary cookies: a session cookie for sign-in (Clerk) and a cookie that remembers your language choice (“locale”, stored for one year). We do not use analytics, marketing or tracking cookies, so we do not need a consent banner. Stripe may set its own cookies when you pay on Stripe’s pages."
+        ]
+      },
+      {
+        "title": "Your rights",
+        "paragraphs": [
+          "You have the right to access the data we hold about you, to have it corrected or deleted, to restrict processing, to receive it in a machine-readable format (data portability), and to object to processing based on legitimate interest.",
+          "Contact us at {email} to exercise your rights. You also have the right to lodge a complaint with the Norwegian Data Protection Authority, Datatilsynet (www.datatilsynet.no)."
+        ]
+      },
+      {
+        "title": "Information security",
+        "paragraphs": [
+          "We use encrypted connections (HTTPS) and access control so that each user can only see their own data. No system is completely secure, but we take reasonable technical and organisational measures to protect your data. If a breach occurs that triggers a duty to notify, we will notify Datatilsynet and affected users in line with the law."
+        ]
+      },
+      {
+        "title": "Children",
+        "paragraphs": [
+          "The service is not directed at people under 18, and we do not knowingly collect data about children."
+        ]
+      },
+      {
+        "title": "Changes to this policy",
+        "paragraphs": [
+          "We may update this policy. For material changes we will notify you by email or in the service. The date of the last update is shown at the top of the page."
+        ]
+      },
+      {
+        "title": "Contact",
+        "paragraphs": [
+          "{name} (org. no. {orgNr})",
+          "{address}",
+          "Email: {email}"
+        ]
+      }
+    ]
   }
 }

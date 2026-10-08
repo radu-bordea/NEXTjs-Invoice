@@ -1,9 +1,18 @@
 "use server"
 
 import { auth, currentUser } from "@clerk/nextjs/server"
+import { getLocale } from "next-intl/server"
 import { redirect } from "next/navigation"
 import stripe from "@/lib/stripe"
 import prisma from "@/lib/prisma"
+
+/**
+ * Stripe supports "nb" (Norwegian Bokmål) and "en". Anything that is
+ * not Norwegian falls back to English.
+ */
+async function getStripeLocale(): Promise<"nb" | "en"> {
+  return (await getLocale()) === "nb" ? "nb" : "en"
+}
 
 /**
  * Starts a Stripe Checkout session for the logged-in user to
@@ -28,6 +37,7 @@ export async function createCheckoutSession() {
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
+    locale: await getStripeLocale(),
     customer: existing?.stripeCustomerId,
     customer_email: existing ? undefined : email,
     line_items: [
@@ -58,6 +68,7 @@ export async function createPortalSession() {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripeCustomerId,
+    locale: await getStripeLocale(),
     return_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
   })
 

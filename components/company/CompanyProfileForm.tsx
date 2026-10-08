@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useEffect } from "react";
+import { useTranslations, useFormatter } from "next-intl";
 import {
   saveCompanyProfile,
   type SaveCompanyProfileState,
@@ -21,6 +22,8 @@ export function CompanyProfileForm({
 }: {
   profile: CompanyProfile | null;
 }) {
+  const t = useTranslations("CompanyProfile");
+  const format = useFormatter();
   const [isEditing, setIsEditing] = useState(profile === null);
 
   const [state, formAction, isPending] = useActionState(
@@ -42,32 +45,33 @@ export function CompanyProfileForm({
     return (
       <div className="space-y-6">
         <div className="rounded-lg border p-6 space-y-4">
-          <ViewRow label="Company name" value={profile.name} />
-          <ViewRow label="Org.nr" value={profile.orgNr} />
-          <ViewRow label="Address" value={profile.address} />
-          <ViewRow label="Phone" value={profile.phone} />
-          <ViewRow label="Email" value={profile.email} />
+          <ViewRow label={t("companyName")} value={profile.name} />
+          <ViewRow label={t("orgNr")} value={profile.orgNr} />
+          <ViewRow label={t("address")} value={profile.address} />
+          <ViewRow label={t("phone")} value={profile.phone} />
+          <ViewRow label={t("email")} value={profile.email} />
           <ViewRow
-            label="MVA registered from"
+            label={t("mvaFrom")}
             value={
               profile.mvaRegisteredFrom
-                ? new Date(profile.mvaRegisteredFrom).toLocaleDateString()
-                : "Not registered"
+                ? format.dateTime(new Date(profile.mvaRegisteredFrom), {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : t("notRegistered")
             }
           />
-          <ViewRow
-            label="IBAN / account number"
-            value={profile.ibanOrAccount}
-          />
-          <ViewRow label="BIC/SWIFT" value={profile.bic || "—"} />
-          <ViewRow label="Bank name" value={profile.bankName} />
+          <ViewRow label={t("account")} value={profile.ibanOrAccount} />
+          <ViewRow label={t("bic")} value={profile.bic || "—"} />
+          <ViewRow label={t("bankName")} value={profile.bankName} />
         </div>
 
         <button
           onClick={() => setIsEditing(true)}
           className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors cursor-pointer"
         >
-          Edit profile
+          {t("edit")}
         </button>
       </div>
     );
@@ -76,35 +80,35 @@ export function CompanyProfileForm({
   return (
     <form action={formAction} className="space-y-5">
       <Field
-        label="Company name"
+        label={t("companyName")}
         name="name"
         required
         defaultValue={state.submittedValues?.name ?? profile?.name}
         error={state.errors?.name}
       />
       <Field
-        label="Org.nr"
+        label={t("orgNr")}
         name="orgNr"
         required
         defaultValue={state.submittedValues?.orgNr ?? profile?.orgNr}
         error={state.errors?.orgNr}
       />
       <Field
-        label="Address"
+        label={t("address")}
         name="address"
         required
         defaultValue={state.submittedValues?.address ?? profile?.address}
         error={state.errors?.address}
       />
       <Field
-        label="Phone"
+        label={t("phone")}
         name="phone"
         required
         defaultValue={state.submittedValues?.phone ?? profile?.phone}
         error={state.errors?.phone}
       />
       <Field
-        label="Email"
+        label={t("email")}
         name="email"
         type="email"
         required
@@ -112,7 +116,7 @@ export function CompanyProfileForm({
         error={state.errors?.email}
       />
       <Field
-        label="MVA registered from (leave empty if not yet registered)"
+        label={t("mvaFromHint")}
         name="mvaRegisteredFrom"
         type="date"
         defaultValue={
@@ -127,7 +131,7 @@ export function CompanyProfileForm({
       <input type="hidden" name="defaultCurrency" value="NOK" />
 
       <Field
-        label="IBAN / account number"
+        label={t("account")}
         name="ibanOrAccount"
         required
         defaultValue={
@@ -136,13 +140,13 @@ export function CompanyProfileForm({
         error={state.errors?.ibanOrAccount}
       />
       <Field
-        label="BIC/SWIFT (optional)"
+        label={t("bicOptional")}
         name="bic"
         defaultValue={state.submittedValues?.bic ?? profile?.bic ?? ""}
         error={state.errors?.bic}
       />
       <Field
-        label="Bank name"
+        label={t("bankName")}
         name="bankName"
         required
         defaultValue={state.submittedValues?.bankName ?? profile?.bankName}
@@ -165,7 +169,7 @@ export function CompanyProfileForm({
           disabled={isPending}
           className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
         >
-          {isPending ? "Saving..." : "Save profile"}
+          {isPending ? t("saving") : t("save")}
         </button>
 
         {profile && (
@@ -174,7 +178,7 @@ export function CompanyProfileForm({
             onClick={() => setIsEditing(false)}
             className="rounded-full font-medium px-6 py-3 border hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            Cancel
+            {t("cancel")}
           </button>
         )}
       </div>
@@ -214,6 +218,8 @@ function Field({
   error?: string[];
   required?: boolean;
 }) {
+  const te = useTranslations("Errors");
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1">
@@ -226,7 +232,11 @@ function Field({
         defaultValue={defaultValue ?? ""}
         className="w-full px-4 py-2 border rounded-lg"
       />
-      {error && <p className="text-sm text-red-600 mt-1">{error[0]}</p>}
+      {error && (
+        <p className="text-sm text-red-600 mt-1">
+          {te.has(error[0]) ? te(error[0]) : error[0]}
+        </p>
+      )}
     </div>
   );
 }

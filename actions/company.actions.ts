@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { companyProfileSchema } from "@/lib/zod/company.schema";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Shape of the object returned by `saveCompanyProfile`.
@@ -66,6 +67,8 @@ export async function saveCompanyProfile(
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  const t = await getTranslations("CompanyProfile");
+
   // FormData values are always strings or null — never numbers,
   // booleans, or undefined directly. We normalize a couple of
   // fields below so they match what our Zod schema expects.
@@ -90,7 +93,7 @@ export async function saveCompanyProfile(
     return {
       success: false,
       errors: z.flattenError(parsed.error).fieldErrors,
-      message: "Please fix the errors below.",
+      message: t("fixErrors"),
       submittedValues: {
         name: String(raw.name ?? ""),
         orgNr: String(raw.orgNr ?? ""),
@@ -134,5 +137,5 @@ export async function saveCompanyProfile(
   // render reflects the freshly saved data.
   revalidatePath("/dashboard/settings");
 
-  return { success: true, message: "Company profile saved successfully." };
+  return { success: true, message: t("saved") };
 }

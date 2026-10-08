@@ -6,7 +6,8 @@ import { invoiceSchema } from "@/lib/zod/invoice.schema";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {getInvoiceQuota} from "@/lib/subscription";
+import { getTranslations } from "next-intl/server";
+import { getInvoiceQuota } from "@/lib/subscription";
 
 /**
  * Shape of the object returned by `createInvoice`.
@@ -71,13 +72,15 @@ export async function createInvoice(
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const quota = await getInvoiceQuota(userId)
-if (!quota.canCreate) {
-  return {
-    success: false,
-    message: `Free plan limit reached: ${quota.limit} invoices per month. Upgrade to Pro for unlimited invoices.`,
+  const t = await getTranslations("InvoiceActions");
+
+  const quota = await getInvoiceQuota(userId);
+  if (!quota.canCreate) {
+    return {
+      success: false,
+      message: t("quotaReached", { limit: quota.limit }),
+    };
   }
-}
 
   const companyProfile = await prisma.companyProfile.findUnique({
     where: { userId },
@@ -86,8 +89,7 @@ if (!quota.canCreate) {
   if (!companyProfile) {
     return {
       success: false,
-      message:
-        "Please complete your company profile before creating an invoice.",
+      message: t("profileRequired"),
     };
   }
 
@@ -99,7 +101,7 @@ if (!quota.canCreate) {
     } catch {
       return {
         success: false,
-        message: "Invalid line items data.",
+        message: t("invalidLineItems"),
       };
     }
   }
@@ -130,7 +132,7 @@ if (!quota.canCreate) {
     return {
       success: false,
       errors: z.flattenError(parsed.error).fieldErrors,
-      message: "Please fix the errors below.",
+      message: t("fixErrors"),
       submittedValues: {
         clientName: String(raw.clientName ?? ""),
         clientOrgNr: String(raw.clientOrgNr ?? ""),
@@ -251,18 +253,20 @@ export async function updateInvoice(
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  const t = await getTranslations("InvoiceActions");
+
   const existingInvoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
   });
 
   if (!existingInvoice || existingInvoice.userId !== userId) {
-    return { success: false, message: "Invoice not found." };
+    return { success: false, message: t("notFound") };
   }
 
   if (existingInvoice.status !== "DRAFT") {
     return {
       success: false,
-      message: "Only draft invoices can be edited.",
+      message: t("onlyDrafts"),
     };
   }
 
@@ -272,7 +276,7 @@ export async function updateInvoice(
     try {
       lineItems = JSON.parse(lineItemsRaw);
     } catch {
-      return { success: false, message: "Invalid line items data." };
+      return { success: false, message: t("invalidLineItems") };
     }
   }
 
@@ -301,7 +305,7 @@ export async function updateInvoice(
     return {
       success: false,
       errors: z.flattenError(parsed.error).fieldErrors,
-      message: "Please fix the errors below.",
+      message: t("fixErrors"),
       submittedValues: {
         clientName: String(raw.clientName ?? ""),
         clientOrgNr: String(raw.clientOrgNr ?? ""),
@@ -394,7 +398,6 @@ export async function getRecentClients() {
       distinctClients.push(invoice);
     }
   }
-  
+
   return distinctClients;
 }
-

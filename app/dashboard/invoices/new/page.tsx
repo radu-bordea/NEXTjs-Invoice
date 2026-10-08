@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
+import { getTranslations } from "next-intl/server"
 import prisma from "@/lib/prisma"
 import { InvoiceForm } from "@/components/invoice/InvoiceForm"
 import { UpgradePrompt } from "@/components/UpgradePrompt"
@@ -13,6 +14,7 @@ export default async function NewInvoicePage({
   if (!userId) throw new Error("Unauthorized")
 
   const { from } = await searchParams
+  const t = await getTranslations("NewInvoice")
   const quota = await getInvoiceQuota(userId)
 
   // Build a prefilled "template" from an existing invoice.
@@ -39,18 +41,18 @@ export default async function NewInvoicePage({
 
   return (
     <main className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">New invoice</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
 
       {!quota.canCreate ? (
         <UpgradePrompt
-          title="You've used your 3 free invoices this month"
-          message="Upgrade to Pro for unlimited invoices, email delivery and Skatteetaten reports. Your limit resets on the 1st."
+          title={t("limitTitle", { limit: quota.limit })}
+          message={t("limitMessage")}
         />
       ) : (
         <>
           {!quota.subscribed && (
             <p className="text-sm text-gray-500 mb-4">
-              {quota.used} of {quota.limit} free invoices used this month
+              {t("usage", { used: quota.used, limit: quota.limit })}
             </p>
           )}
           <InvoiceForm template={template} />

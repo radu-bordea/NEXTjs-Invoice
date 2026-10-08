@@ -1,22 +1,19 @@
 import { z } from "zod";
 
 export const companyProfileSchema = z.object({
-  name: z.string().min(1, "Company name is required"),
-  orgNr: z.string().regex(/^\d{9}$/, "Org.nr must be exactly 9 digits"),
-  address: z.string().min(1, "Address is required"),
+  name: z.string().min(1, "nameRequired"),
+  orgNr: z.string().regex(/^\d{9}$/, "orgNrInvalid"),
+  address: z.string().min(1, "addressRequired"),
   phone: z
     .string()
-    .min(1, "Phone is required")
-    .regex(
-      /^\+?[0-9\s]{7,15}$/,
-      "Phone must contain only numbers, spaces, and an optional leading +",
-    ),
-  email: z.email("Invalid email address"),
+    .min(1, "phoneRequired")
+    .regex(/^\+?[0-9\s]{7,15}$/, "phoneInvalid"),
+  email: z.email("emailInvalid"),
   mvaRegisteredFrom: z.string().optional().nullable(),
   defaultCurrency: z.literal("NOK").default("NOK"),
-  ibanOrAccount: z.string().min(1, "IBAN or account number is required"),
+  ibanOrAccount: z.string().min(1, "accountRequired"),
   bic: z.string().optional(),
-  bankName: z.string().min(1, "Bank name is required"),
+  bankName: z.string().min(1, "bankNameRequired"),
 });
 
 export type CompanyProfileInput = z.infer<typeof companyProfileSchema>;

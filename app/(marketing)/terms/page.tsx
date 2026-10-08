@@ -1,11 +1,23 @@
-export default function TermsPage() {
+import { getFormatter, getTranslations } from "next-intl/server"
+import { LegalPage, type LegalSection } from "@/components/LegalPage"
+import { LEGAL } from "@/lib/legal-info"
+
+export default async function TermsPage() {
+  const t = await getTranslations("Terms")
+  const tl = await getTranslations("Legal")
+  const format = await getFormatter()
+
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16">
-      <h1 className="text-2xl font-bold mb-4">Terms of Service</h1>
-      <p className="text-gray-500">
-        This page is coming soon. Terms of Service will be published here
-        before paid subscriptions go live.
-      </p>
-    </main>
+    <LegalPage
+      title={t("title")}
+      updated={tl("lastUpdated", {
+        date: format.dateTime(new Date(LEGAL.lastUpdated), {
+          dateStyle: "long",
+          timeZone: "UTC",
+        }),
+      })}
+      intro={t.raw("intro") as string}
+      sections={t.raw("sections") as LegalSection[]}
+    />
   )
 }
