@@ -31,3 +31,6 @@
 - "build:local": "next build --webpack"
 
 - npx tsc --noEmit
+
+# translation
+- npm install next-intl

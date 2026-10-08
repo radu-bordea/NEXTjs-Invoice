@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
@@ -9,9 +10,7 @@ import { Eye, Pencil, FileDown, Copy } from "lucide-react";
 
 /**
  * Invoice list page. Supports filtering by status and searching by
- * client name via the URL (?status=DRAFT&client=acme) — using
- * searchParams keeps this a server component with no extra client
- * JS, and makes filtered views shareable/bookmarkable links.
+ * client name via the URL (?status=DRAFT&client=acme).
  */
 export default async function InvoicesPage({
   searchParams,
@@ -22,6 +21,11 @@ export default async function InvoicesPage({
   if (!userId) throw new Error("Unauthorized");
 
   const { status, client } = await searchParams;
+
+  const t = await getTranslations("Invoices");
+  const tStatus = await getTranslations("Status");
+  const tBilling = await getTranslations("BillingType");
+  const format = await getFormatter();
 
   const invoices = await prisma.invoice.findMany({
     where: {
@@ -35,43 +39,46 @@ export default async function InvoicesPage({
     include: { lineItems: true },
   });
 
+  const dateOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  } as const;
+
   return (
     <main className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Invoices</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
         <Link
           href="/dashboard/invoices/new"
           className="bg-teal-700 text-white rounded-full font-medium px-5 py-2.5 hover:bg-teal-800 transition-colors"
         >
-          + New Invoice
+          {t("newInvoice")}
         </Link>
       </div>
 
-      {/* Filter bar: status pills + client name search, both drive
-          the same URL-based filtering via a GET form for the search
-          box (no client JS needed — submitting reloads with ?client=) */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex gap-2">
           <FilterLink
-            label="All"
+            label={t("all")}
             status={undefined}
             current={status}
             client={client}
           />
           <FilterLink
-            label="Draft"
+            label={tStatus("DRAFT")}
             status="DRAFT"
             current={status}
             client={client}
           />
           <FilterLink
-            label="Sent"
+            label={tStatus("SENT")}
             status="SENT"
             current={status}
             client={client}
           />
           <FilterLink
-            label="Paid"
+            label={tStatus("PAID")}
             status="PAID"
             current={status}
             client={client}
@@ -82,29 +89,35 @@ export default async function InvoicesPage({
       </div>
 
       {invoices.length === 0 ? (
-        <p className="text-gray-500">No invoices found.</p>
+        <p className="text-gray-500">{t("noInvoices")}</p>
       ) : (
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-225 text-sm border-collapse text-left">
             <thead>
               <tr className="text-left border-b">
                 <th className="py-2 px-3 text-left whitespace-nowrap">
-                  Invoice #
+                  {t("number")}
                 </th>
                 <th className="py-2 px-3 text-left whitespace-nowrap">
-                  Client
-                </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">Date</th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">Due</th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">Type</th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
-                  Amount
+                  {t("client")}
                 </th>
                 <th className="py-2 px-3 text-left whitespace-nowrap">
-                  Status
+                  {t("date")}
                 </th>
                 <th className="py-2 px-3 text-left whitespace-nowrap">
-                  Actions
+                  {t("due")}
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  {t("type")}
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  {t("amount")}
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  {t("status")}
+                </th>
+                <th className="py-2 px-3 text-left whitespace-nowrap">
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -124,28 +137,31 @@ export default async function InvoicesPage({
                   </td>
 
                   <td className="py-2 px-3 text-left whitespace-nowrap">
-                    {new Date(invoice.invoiceDate).toLocaleDateString()}
+                    {format.dateTime(new Date(invoice.invoiceDate), dateOptions)}
                   </td>
 
                   <td className="py-2 px-3 text-left whitespace-nowrap">
-                    {new Date(invoice.dueDate).toLocaleDateString()}
+                    {format.dateTime(new Date(invoice.dueDate), dateOptions)}
                   </td>
 
                   <td className="py-2 px-3 text-left whitespace-nowrap">
-                    {invoice.billingType}
+                    {tBilling(invoice.billingType)}
                   </td>
 
                   <td className="py-2 px-3 text-left whitespace-nowrap">
                     {invoice.currency}{" "}
-                    {calculateInvoiceTotals({
-                      billingType: invoice.billingType,
-                      fixedPrice: invoice.fixedPrice
-                        ? Number(invoice.fixedPrice)
-                        : null,
-                      lineItems: invoice.lineItems,
-                      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                      invoiceDate: invoice.invoiceDate,
-                    }).grandTotal.toFixed(2)}
+                    {format.number(
+                      calculateInvoiceTotals({
+                        billingType: invoice.billingType,
+                        fixedPrice: invoice.fixedPrice
+                          ? Number(invoice.fixedPrice)
+                          : null,
+                        lineItems: invoice.lineItems,
+                        mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+                        invoiceDate: invoice.invoiceDate,
+                      }).grandTotal,
+                      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                    )}
                   </td>
 
                   <td className="py-2 px-3 text-left whitespace-nowrap">
@@ -157,7 +173,7 @@ export default async function InvoicesPage({
                       <Link
                         href={`/dashboard/invoices/${invoice.id}`}
                         className="text-gray-600 hover:text-teal-700"
-                        title="View"
+                        title={t("view")}
                       >
                         <Eye
                           className="text-green-600 cursor-pointer"
@@ -168,7 +184,7 @@ export default async function InvoicesPage({
                       <Link
                         href={`/dashboard/invoices/${invoice.id}/edit`}
                         className="text-gray-600 hover:text-teal-700"
-                        title="Edit"
+                        title={t("edit")}
                       >
                         <Pencil
                           className="text-yellow-500 cursor-pointer"
@@ -179,17 +195,18 @@ export default async function InvoicesPage({
                       <Link
                         href={`/dashboard/invoices/${invoice.id}/pdf`}
                         className="text-gray-600 hover:text-teal-700"
-                        title="Download PDF"
+                        title={t("downloadPdf")}
                       >
                         <FileDown
                           className="text-red-700 cursor-pointer"
                           size={16}
                         />
                       </Link>
+
                       <Link
                         href={`/dashboard/invoices/new?from=${invoice.id}`}
                         className="text-gray-600 hover:text-teal-700"
-                        title="Duplicate"
+                        title={t("duplicate")}
                       >
                         <Copy
                           className="text-blue-600 cursor-pointer"
@@ -205,9 +222,7 @@ export default async function InvoicesPage({
         </div>
       )}
 
-      {/* Pagination placeholder — wired up properly once there's
-          enough test data for it to matter. Keeping the slot here
-          now so the layout doesn't shift later. */}
+      {/* Pagination placeholder */}
       <div className="flex justify-center mt-6 text-sm text-gray-400">
         {/* Pagination controls go here */}
       </div>
@@ -216,7 +231,7 @@ export default async function InvoicesPage({
 }
 
 /**
- * A single status filter pill — a plain link that sets/clears the
+ * A single status filter pill: a plain link that sets/clears the
  * "status" query param while preserving any active client search.
  */
 function FilterLink({

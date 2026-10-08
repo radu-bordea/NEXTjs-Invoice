@@ -2,7 +2,9 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import {PlanBadge} from "@/components/PlanBadge";
+import { getTranslations } from "next-intl/server";
+import { PlanBadge } from "@/components/PlanBadge";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +14,8 @@ export default async function DashboardLayout({
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
+  const t = await getTranslations("Nav");
+
   return (
     <>
       <header className="flex justify-between items-center px-6 h-16 border-b border-zinc-200">
@@ -20,20 +24,23 @@ export default async function DashboardLayout({
             href="/dashboard/settings"
             className="hover:text-purple-700 border-r border-zinc-200 pr-6"
           >
-            Company Profile
+            {t("companyProfile")}
           </Link>
           <Link href="/dashboard/invoices" className="hover:text-purple-700">
-            Invoices
+            {t("invoices")}
           </Link>
           <Link href="/dashboard/reports" className="hover:text-teal-700">
-            Reports
+            {t("reports")}
           </Link>
           <Link href="/pricing" className="hover:text-purple-700">
-            Pricing
+            {t("pricing")}
           </Link>
           <PlanBadge />
         </nav>
-        <UserButton />
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          <UserButton />
+        </div>
       </header>
       <main className="flex-1">{children}</main>
     </>

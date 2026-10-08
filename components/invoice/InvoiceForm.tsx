@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   createInvoice,
   updateInvoice,
@@ -28,8 +29,7 @@ const initialState: CreateInvoiceState = { success: false };
 /**
  * Converts Prisma's typed WorkLogItem rows (Decimal, Date) into the
  * plain-string shape this form's local state uses for controlled
- * inputs — the inverse of what happens when the form serializes
- * lineItems to JSON before submitting.
+ * inputs.
  */
 function toLineItemRows(items: WorkLogItem[]): LineItemRow[] {
   return items.map((item) => ({
@@ -42,8 +42,8 @@ function toLineItemRows(items: WorkLogItem[]): LineItemRow[] {
 
 /**
  * Invoice form for both creating and editing. Pass `invoice` to
- * pre-fill and switch into edit mode (calls `updateInvoice` bound
- * to that invoice's id); omit it for the create flow.
+ * pre-fill and switch into edit mode; pass `template` to prefill a
+ * new invoice (duplicate); omit both for an empty form.
  */
 export function InvoiceForm({
   invoice,
@@ -52,13 +52,13 @@ export function InvoiceForm({
   invoice?: Invoice & { lineItems: WorkLogItem[] };
   template?: Invoice & { lineItems: WorkLogItem[] };
 }) {
+  const t = useTranslations("InvoiceForm");
+  const tBilling = useTranslations("BillingType");
+  const format = useFormatter();
+
   const isEditMode = Boolean(invoice);
   const source = invoice ?? template;
 
-  // In edit mode, bind the invoice's id as the first argument so
-  // the resulting function matches useActionState's required
-  // (prevState, formData) signature — updateInvoice itself takes
-  // three arguments, but bind() locks in invoiceId ahead of time.
   const action = isEditMode
     ? updateInvoice.bind(null, invoice!.id)
     : createInvoice;
@@ -105,7 +105,9 @@ export function InvoiceForm({
   return (
     <form action={formAction} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-1">Billing type</label>
+        <label className="block text-sm font-medium mb-1">
+          {t("billingType")}
+        </label>
         <div className="flex gap-2">
           <button
             type="button"
@@ -116,7 +118,7 @@ export function InvoiceForm({
                 : "border-gray-300"
             }`}
           >
-            Hourly
+            {tBilling("HOURLY")}
           </button>
           <button
             type="button"
@@ -127,7 +129,7 @@ export function InvoiceForm({
                 : "border-gray-300"
             }`}
           >
-            Fixed price
+            {tBilling("FIXED")}
           </button>
         </div>
         <input type="hidden" name="billingType" value={billingType} />
@@ -156,10 +158,11 @@ export function InvoiceForm({
       )}
 
       <fieldset className="space-y-4 border rounded-lg p-4">
-        <legend className="text-sm font-medium px-1">Client</legend>
+        <legend className="text-sm font-medium px-1">{t("client")}</legend>
         <div>
           <label className="block text-sm font-medium mb-1">
-            Client name<span className="text-red-600 ml-0.5">*</span>
+            {t("clientName")}
+            <span className="text-red-600 ml-0.5">*</span>
           </label>
           <input
             name="clientName"
@@ -176,7 +179,9 @@ export function InvoiceForm({
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Org.nr</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("orgNr")}
+          </label>
           <input
             name="clientOrgNr"
             value={clientFields.clientOrgNr}
@@ -188,7 +193,8 @@ export function InvoiceForm({
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
-            Address<span className="text-red-600 ml-0.5">*</span>
+            {t("address")}
+            <span className="text-red-600 ml-0.5">*</span>
           </label>
           <input
             name="clientAddress"
@@ -205,7 +211,9 @@ export function InvoiceForm({
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("email")}
+          </label>
           <input
             name="clientEmail"
             type="email"
@@ -219,9 +227,9 @@ export function InvoiceForm({
       </fieldset>
 
       <fieldset className="space-y-4 border rounded-lg p-4">
-        <legend className="text-sm font-medium px-1">Invoice details</legend>
+        <legend className="text-sm font-medium px-1">{t("details")}</legend>
         <Field
-          label="Invoice date"
+          label={t("invoiceDate")}
           name="invoiceDate"
           type="date"
           required
@@ -234,7 +242,7 @@ export function InvoiceForm({
           error={state.errors?.invoiceDate}
         />
         <Field
-          label="Due date"
+          label={t("dueDate")}
           name="dueDate"
           type="date"
           required
@@ -245,7 +253,7 @@ export function InvoiceForm({
           error={state.errors?.dueDate}
         />
         <Field
-          label="Period start"
+          label={t("periodStart")}
           name="periodStart"
           type="date"
           defaultValue={
@@ -257,7 +265,7 @@ export function InvoiceForm({
           error={state.errors?.periodStart}
         />
         <Field
-          label="Period end"
+          label={t("periodEnd")}
           name="periodEnd"
           type="date"
           defaultValue={
@@ -269,7 +277,7 @@ export function InvoiceForm({
           error={state.errors?.periodEnd}
         />
         <Field
-          label="Project reference"
+          label={t("projectRef")}
           name="projectRef"
           defaultValue={
             state.submittedValues?.projectRef ?? source?.projectRef ?? ""
@@ -282,7 +290,7 @@ export function InvoiceForm({
       {billingType === "HOURLY" && (
         <fieldset className="space-y-3 border rounded-lg p-4">
           <legend className="text-sm font-medium px-1">
-            Work log <span className="text-red-600">*</span>
+            {t("workLog")} <span className="text-red-600">*</span>
           </legend>
 
           {lineItems.map((row, index) => (
@@ -303,7 +311,7 @@ export function InvoiceForm({
               {/* Date */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Date
+                  {t("rowDate")}
                 </label>
                 <input
                   type="date"
@@ -316,11 +324,11 @@ export function InvoiceForm({
               {/* Description */}
               <div className="sm:col-span-1">
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Description
+                  {t("description")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Description"
+                  placeholder={t("description")}
                   value={row.description}
                   onChange={(e) =>
                     updateRow(index, "description", e.target.value)
@@ -332,12 +340,12 @@ export function InvoiceForm({
               {/* Hours */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Hours
+                  {t("hours")}
                 </label>
                 <input
                   type="number"
                   step="0.5"
-                  placeholder="Hours"
+                  placeholder={t("hours")}
                   value={row.hours}
                   onChange={(e) => updateRow(index, "hours", e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
@@ -347,12 +355,12 @@ export function InvoiceForm({
               {/* Rate */}
               <div className="relative">
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Rate
+                  {t("rate")}
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  placeholder="Rate"
+                  placeholder={t("rate")}
                   value={row.rate}
                   onChange={(e) => updateRow(index, "rate", e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg text-sm bg-white pr-10"
@@ -371,7 +379,7 @@ export function InvoiceForm({
           px-2
           py-1
         "
-                aria-label="Remove row"
+                aria-label={t("removeRow")}
               >
                 ✕
               </button>
@@ -383,11 +391,16 @@ export function InvoiceForm({
             onClick={addRow}
             className="text-sm text-teal-700 font-medium cursor-pointer"
           >
-            + Add row
+            {t("addRow")}
           </button>
 
           <p className="text-sm text-gray-500 pt-2">
-            Running total: {hourlyTotal.toFixed(2)}
+            {t("runningTotal", {
+              total: format.number(hourlyTotal, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+            })}
           </p>
 
           {state.errors?.lineItems && (
@@ -404,15 +417,17 @@ export function InvoiceForm({
 
       {billingType === "FIXED" && (
         <fieldset className="border rounded-lg p-4">
-          <legend className="text-sm font-medium px-1">Fixed price</legend>
+          <legend className="text-sm font-medium px-1">
+            {tBilling("FIXED")}
+          </legend>
           <Field
-            label="Project price"
+            label={t("projectPrice")}
             name="fixedPrice"
             type="number"
             required
             defaultValue={
               state.submittedValues?.fixedPrice ??
-              (invoice?.fixedPrice ? invoice.fixedPrice.toString() : "")
+              (source?.fixedPrice ? source.fixedPrice.toString() : "")
             }
             error={state.errors?.fixedPrice}
           />
@@ -435,10 +450,10 @@ export function InvoiceForm({
         className="bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
       >
         {isPending
-          ? "Saving..."
+          ? t("saving")
           : isEditMode
-            ? "Save changes"
-            : "Create invoice"}
+            ? t("saveChanges")
+            : t("create")}
       </button>
     </form>
   );

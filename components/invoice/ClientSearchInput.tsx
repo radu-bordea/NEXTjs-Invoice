@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * Live-filtering client name search box. Updates the "client" URL
@@ -13,42 +14,45 @@ import { useEffect, useState } from "react"
  * the URL, so switching one filter never clears the other.
  */
 export function ClientSearchInput() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [value, setValue] = useState(searchParams.get("client") ?? "")
+  const [value, setValue] = useState(searchParams.get("client") ?? "");
+
+  const t = useTranslations("ClientSearch");
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString())
-      const currentClient = params.get("client") ?? ""
+      const params = new URLSearchParams(searchParams.toString());
+      const currentClient = params.get("client") ?? "";
 
       // Skip navigating if nothing actually changed — without this,
       // the effect could keep re-triggering itself via the router
       // push causing a re-render, which is what caused the request
       // spam you saw in the terminal.
-      if (currentClient === value) return
+      if (currentClient === value) return;
 
       if (value) {
-        params.set("client", value)
+        params.set("client", value);
       } else {
-        params.delete("client")
+        params.delete("client");
       }
 
-      router.push(`/dashboard/invoices?${params.toString()}`)
+      router.push(`/dashboard/invoices?${params.toString()}`);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, 300)
+    }, 300);
 
-    return () => clearTimeout(timeout)
-  }, [value])
+    return () => clearTimeout(timeout);
+  }, [value]);
 
   return (
     <input
       type="text"
-      placeholder="Search client..."
+      placeholder={t("placeholder")}
+      aria-label={t("placeholder")}
       value={value}
       onChange={(e) => setValue(e.target.value)}
       className="px-3 py-1.5 border rounded-lg text-sm ml-auto"
     />
-  )
+  );
 }

@@ -1,0 +1,131 @@
+{
+  "Metadata": {
+    "title": "nextjs-invoice",
+    "description": "Fakturagenerator for norske frilansere"
+  },
+  "Common": {
+    "save": "Lagre",
+    "language": "Språk"
+  },
+  "Nav": {
+    "companyProfile": "Firmaprofil",
+    "invoices": "Fakturaer",
+    "reports": "Rapporter",
+    "pricing": "Priser",
+    "dashboard": "Dashbord",
+    "signIn": "Logg inn",
+    "signUp": "Registrer deg"
+  },
+  "Home": {
+    "title": "Fakturering laget for norske frilansere",
+    "subtitle": "Lag profesjonelle fakturaer, før timer eller bruk fastpris, og last ned PDF-er klare for Skatteetaten på få minutter – uten regneark og uten Google Docs-maler.",
+    "cta": "Gå til dashbord",
+    "norwayTitle": "Laget for Norge",
+    "norwayText": "Org.nr, MVA-grenser og IBAN/KID-felter – satt opp slik Skatteetaten forventer.",
+    "billingTitle": "Timebasert eller fastpris",
+    "billingText": "Før timer mot en timepris, eller fakturer en fast prosjektpris – velg per faktura.",
+    "draftTitle": "Utkast, rediger, last ned",
+    "draftText": "Lagre ufullstendige fakturaer som utkast, rediger når som helst, og eksporter en ren PDF når du er klar til å sende."
+  },
+  "PlanBadge": {
+    "pro": "Pro",
+    "proCancels": "Pro · avsluttes {date}",
+    "free": "Gratis · {used} av {limit} brukt",
+    "freeAtLimit": "Gratis · {used} av {limit} brukt · Oppgrader"
+  },
+  "Footer": {
+    "orgNr": "Org.nr",
+    "rights": "Alle rettigheter forbeholdt.",
+    "pricing": "Priser",
+    "terms": "Vilkår",
+    "privacy": "Personvernerklæring"
+  },
+  "UpgradePrompt": {
+    "button": "Oppgrader til Pro"
+  },
+  "Status": {
+    "DRAFT": "Utkast",
+    "SENT": "Sendt",
+    "PAID": "Betalt"
+  },
+  "BillingType": {
+    "HOURLY": "Timebasert",
+    "FIXED": "Fastpris"
+  },
+  "Pricing": {
+    "title": "Enkel prising for norske frilansere",
+    "subtitle": "Start gratis, og oppgrader når du trenger mer enn noen få fakturaer i måneden.",
+    "free": "Gratis",
+    "pro": "Pro",
+    "perMonth": "per måned",
+    "vatNote": "inkl. MVA",
+    "mostPopular": "Mest populær",
+    "yourPlan": "Din plan",
+    "invoices3": "3 fakturaer per måned",
+    "invoicesUnlimited": "Ubegrenset antall fakturaer",
+    "profile": "Firmaprofil og MVA-oppfølging",
+    "clients": "Kundehistorikk og forhåndsutfylling",
+    "pdf": "PDF-nedlasting",
+    "email": "Send faktura på e-post til kunden",
+    "reports": "Rapporter og Skatteetaten-eksport",
+    "getStarted": "Kom i gang gratis",
+    "goToDashboard": "Gå til dashbord",
+    "renewsOn": "Fornyes {date}",
+    "cancelsOn": "Avsluttes {date}",
+    "manage": "Administrer abonnement",
+    "subscribe": "Abonner",
+    "signUpToSubscribe": "Registrer deg for å abonnere",
+    "footnote": "Priser vises i NOK. Avslutt når som helst."
+  },
+  "Invoices": {
+    "title": "Fakturaer",
+    "newInvoice": "+ Ny faktura",
+    "all": "Alle",
+    "noInvoices": "Ingen fakturaer funnet.",
+    "number": "Fakturanr.",
+    "client": "Kunde",
+    "date": "Dato",
+    "due": "Forfall",
+    "type": "Type",
+    "amount": "Beløp",
+    "status": "Status",
+    "actions": "Handlinger",
+    "view": "Vis",
+    "edit": "Rediger",
+    "downloadPdf": "Last ned PDF",
+    "duplicate": "Dupliser"
+  },
+  "ClientSearch": {
+    "placeholder": "Søk etter kunde..."
+  },
+  "ClientPicker": {
+    "label": "Fyll ut fra en tidligere kunde",
+    "placeholder": "Velg en kunde... (eller tøm feltene)"
+  },
+  "InvoiceForm": {
+    "billingType": "Faktureringstype",
+    "client": "Kunde",
+    "clientName": "Kundenavn",
+    "orgNr": "Org.nr",
+    "address": "Adresse",
+    "email": "E-post",
+    "details": "Fakturadetaljer",
+    "invoiceDate": "Fakturadato",
+    "dueDate": "Forfallsdato",
+    "periodStart": "Periode fra",
+    "periodEnd": "Periode til",
+    "projectRef": "Prosjektreferanse",
+    "workLog": "Timeliste",
+    "rowDate": "Dato",
+    "description": "Beskrivelse",
+    "hours": "Timer",
+    "rate": "Timepris",
+    "removeRow": "Fjern rad",
+    "addRow": "+ Legg til rad",
+    "runningTotal": "Løpende sum: {total}",
+    "projectPrice": "Prosjektpris",
+    "saving": "Lagrer...",
+    "saveChanges": "Lagre endringer",
+    "create": "Opprett faktura"
+  }
+}

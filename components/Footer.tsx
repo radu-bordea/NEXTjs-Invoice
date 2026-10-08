@@ -1,15 +1,8 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-/**
- * Marketing-site footer — business identity, copyright, and legal
- * links. Shown on public pages only (homepage, pricing), not
- * inside the logged-in dashboard.
- *
- * Terms and Privacy currently link to placeholder pages — real
- * content needs to be written before Stripe subscriptions go live
- * for real users.
- */
 export function Footer() {
+  const t = useTranslations("Footer");
   const year = new Date().getFullYear();
 
   return (
@@ -20,11 +13,9 @@ export function Footer() {
             <p className="font-medium text-gray-700 mb-1">
               Radu Bordea Digital Solutions
             </p>
-            <p>Org.nr: 935 492 513</p>
+            <p>{t("orgNr")}: 935 492 513</p>
             <p>
-              {/* mailto: links correctly stay as <a> — they leave
-                  the app entirely (open the user's email client),
-                  so Next.js's client-side Link doesn't apply here. */}
+              {/* mailto: stays a plain <a>: it opens the email client */}
               <a
                 href="mailto:radu.bordea.dev@gmail.com"
                 className="hover:text-teal-700"
@@ -35,18 +26,18 @@ export function Footer() {
           </div>
 
           <p className="sm:mt-8 text-xs text-gray-400">
-            © {year} Radu Bordea Digital Solutions. All rights reserved.
+            © {year} Radu Bordea Digital Solutions. {t("rights")}
           </p>
 
           <div className="flex flex-col gap-1 sm:items-end">
             <Link href="/pricing" className="hover:text-teal-700">
-              Pricing
+              {t("pricing")}
             </Link>
             <Link href="/terms" className="hover:text-teal-700">
-              Terms of Service
+              {t("terms")}
             </Link>
             <Link href="/privacy" className="hover:text-teal-700">
-              Privacy Policy
+              {t("privacy")}
             </Link>
           </div>
         </div>

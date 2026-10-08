@@ -1,9 +1,8 @@
-/**
- * Small colored pill showing an invoice's status. Shared between
- * the invoice list table and the invoice view page so both stay
- * visually consistent.
- */
+import { useTranslations } from "next-intl"
+
 export function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("Status")
+
   const styles =
     {
       DRAFT: "bg-gray-100 text-gray-700",
@@ -15,7 +14,7 @@ export function StatusBadge({ status }: { status: string }) {
     <span
       className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${styles}`}
     >
-      {status}
+      {t.has(status) ? t(status) : status}
     </span>
   )
 }
