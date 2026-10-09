@@ -2,48 +2,105 @@ import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer"
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations"
 import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
 import type { PdfT } from "@/lib/pdf-i18n"
+import { pdfColors as c } from "@/lib/pdf-theme"
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    paddingTop: 36,
+    paddingHorizontal: 40,
+    paddingBottom: 64,
     fontSize: 10,
     fontFamily: "Helvetica",
-    color: "#1a1a1a",
+    color: c.ink,
   },
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: c.line,
+  },
+  brand: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 15,
+    letterSpacing: 2,
+    color: c.dark,
+    textTransform: "uppercase",
+    maxWidth: "55%",
+  },
+  headerInfo: {
+    alignItems: "flex-end",
+    fontSize: 9,
+    color: c.muted,
+  },
+  headerLine: {
+    marginBottom: 2,
+  },
+
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontFamily: "Times-Bold",
+    fontSize: 30,
+    color: c.dark,
+    marginTop: 20,
   },
   subtitle: {
-    fontSize: 11,
-    color: "#666666",
+    fontFamily: "Times-Roman",
+    fontSize: 13,
+    color: c.dark,
+    marginTop: 2,
     marginBottom: 16,
   },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#cccccc",
-    marginVertical: 12,
+
+  cards: {
+    flexDirection: "row",
+    marginBottom: 18,
   },
+  card: {
+    width: "31%",
+    backgroundColor: c.panel,
+    borderRadius: 6,
+    padding: 10,
+    marginRight: 10,
+  },
+  cardLabel: {
+    fontSize: 8,
+    color: c.muted,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  cardValue: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 14,
+    color: c.dark,
+  },
+
   tableHeaderRow: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#999999",
-    paddingBottom: 4,
-    marginBottom: 4,
+    backgroundColor: c.headerRow,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    fontFamily: "Helvetica-Bold",
+    color: c.dark,
   },
   tableRow: {
     flexDirection: "row",
-    paddingVertical: 3,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#eeeeee",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
   },
-  totalRow: {
+  totalBar: {
     flexDirection: "row",
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: "#333333",
-    marginTop: 2,
+    backgroundColor: c.headerRow,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    fontFamily: "Helvetica-Bold",
+    color: c.dark,
   },
   colNumber: { width: "16%" },
   colClient: { width: "26%" },
@@ -51,11 +108,24 @@ const styles = StyleSheet.create({
   colStatus: { width: "14%" },
   colAmount: { width: "14%", textAlign: "right" },
   colVat: { width: "14%", textAlign: "right" },
-  bold: { fontWeight: "bold" },
+
+  empty: {
+    marginTop: 10,
+    color: c.muted,
+  },
+
   footer: {
-    marginTop: 20,
+    position: "absolute",
+    bottom: 24,
+    left: 40,
+    right: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: c.line,
+    paddingTop: 6,
     fontSize: 8,
-    color: "#999999",
+    color: c.muted,
   },
 })
 
@@ -63,6 +133,7 @@ const styles = StyleSheet.create({
  * Printable summary of issued invoices for a period. Texts come from
  * the `t` / `tStatus` translators and dates/numbers are formatted
  * with `dateLocale`, all prepared by getPdfI18n() in the route.
+ * Each invoice is calculated with its own vatRate.
  */
 export function ReportPDF({
   invoices,
@@ -89,6 +160,7 @@ export function ReportPDF({
       lineItems: invoice.lineItems,
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
       invoiceDate: invoice.invoiceDate,
+      vatRate: invoice.vatRate,
     })
     return { invoice, grandTotal, vatAmount }
   })
@@ -96,34 +168,71 @@ export function ReportPDF({
   const totalAmount = rows.reduce((sum, r) => sum + r.grandTotal, 0)
   const totalVat = rows.reduce((sum, r) => sum + r.vatAmount, 0)
 
+  // Company name/org.nr for the header come from the invoices
+  // themselves (they snapshot the issuer), so no extra prop is needed.
+  const issuer = invoices[0]
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.brand}>{issuer ? issuer.issuerName : ""}</Text>
+          <View style={styles.headerInfo}>
+            {issuer ? (
+              <Text style={styles.headerLine}>
+                {t("orgNr")}: {issuer.issuerOrgNr}
+              </Text>
+            ) : null}
+            <Text style={styles.headerLine}>
+              {t("generated")}: {generatedAt.toLocaleDateString(dateLocale)}{" "}
+              {generatedAt.toLocaleTimeString(dateLocale)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Title */}
         <Text style={styles.title}>{t("title")}</Text>
         <Text style={styles.subtitle}>
-          {t("period")}: {periodLabel} — {t("generated")}:{" "}
-          {generatedAt.toLocaleDateString(dateLocale)}{" "}
-          {generatedAt.toLocaleTimeString(dateLocale)}
+          {t("period")}: {periodLabel}
         </Text>
 
-        <View style={styles.divider} />
+        {/* Summary cards */}
+        {rows.length > 0 ? (
+          <View style={styles.cards}>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>{t("colAmount")}</Text>
+              <Text style={styles.cardValue}>NOK {fmtInt(totalAmount)}</Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>{t("colVat")}</Text>
+              <Text style={styles.cardValue}>NOK {fmtInt(totalVat)}</Text>
+            </View>
+          </View>
+        ) : null}
 
+        {/* Table */}
         <View style={styles.tableHeaderRow}>
-          <Text style={[styles.colNumber, styles.bold]}>{t("colNumber")}</Text>
-          <Text style={[styles.colClient, styles.bold]}>{t("colClient")}</Text>
-          <Text style={[styles.colDate, styles.bold]}>{t("colDate")}</Text>
-          <Text style={[styles.colStatus, styles.bold]}>{t("colStatus")}</Text>
-          <Text style={[styles.colAmount, styles.bold]}>{t("colAmount")}</Text>
-          <Text style={[styles.colVat, styles.bold]}>{t("colVat")}</Text>
+          <Text style={styles.colNumber}>{t("colNumber")}</Text>
+          <Text style={styles.colClient}>{t("colClient")}</Text>
+          <Text style={styles.colDate}>{t("colDate")}</Text>
+          <Text style={styles.colStatus}>{t("colStatus")}</Text>
+          <Text style={styles.colAmount}>{t("colAmount")}</Text>
+          <Text style={styles.colVat}>{t("colVat")}</Text>
         </View>
 
         {rows.length === 0 ? (
-          <Text style={{ marginTop: 8, color: "#666666" }}>
-            {t("noInvoices")}
-          </Text>
+          <Text style={styles.empty}>{t("noInvoices")}</Text>
         ) : (
-          rows.map(({ invoice, grandTotal, vatAmount }) => (
-            <View style={styles.tableRow} key={invoice.id}>
+          rows.map(({ invoice, grandTotal, vatAmount }, index) => (
+            <View
+              style={[
+                styles.tableRow,
+                { backgroundColor: index % 2 === 0 ? c.white : c.zebra },
+              ]}
+              key={invoice.id}
+              wrap={false}
+            >
               <Text style={styles.colNumber}>{invoice.invoiceNumber}</Text>
               <Text style={styles.colClient}>{invoice.clientName}</Text>
               <Text style={styles.colDate}>
@@ -136,20 +245,26 @@ export function ReportPDF({
           ))
         )}
 
-        {rows.length > 0 && (
-          <View style={styles.totalRow}>
-            <Text style={[styles.colNumber, styles.bold]}>{t("total")}</Text>
+        {rows.length > 0 ? (
+          <View style={styles.totalBar} wrap={false}>
+            <Text style={styles.colNumber}>{t("total")}</Text>
             <Text style={styles.colClient}></Text>
             <Text style={styles.colDate}></Text>
             <Text style={styles.colStatus}></Text>
-            <Text style={[styles.colAmount, styles.bold]}>
-              {fmtInt(totalAmount)}
-            </Text>
-            <Text style={[styles.colVat, styles.bold]}>{fmtInt(totalVat)}</Text>
+            <Text style={styles.colAmount}>{fmtInt(totalAmount)}</Text>
+            <Text style={styles.colVat}>{fmtInt(totalVat)}</Text>
           </View>
-        )}
+        ) : null}
 
-        <Text style={styles.footer}>{t("footer")}</Text>
+        {/* Footer on every page */}
+        <View style={styles.footer} fixed>
+          <Text>{t("footer")}</Text>
+          <Text
+            render={({ pageNumber, totalPages }) =>
+              `${pageNumber} / ${totalPages}`
+            }
+          />
+        </View>
       </Page>
     </Document>
   )

@@ -21,6 +21,8 @@ export type MonthlyReport = {
  * invoice (SENT or PAID), because MVA is reported for the period of
  * the invoice date. "Paid" counts only PAID invoices: money received.
  * DRAFTs are never counted.
+ *
+ * Each invoice is calculated with its own vatRate (25, 15, 12 or 0).
  */
 export function aggregateByMonth(
   invoices: InvoiceWithLineItems[],
@@ -40,6 +42,7 @@ export function aggregateByMonth(
       lineItems: invoice.lineItems,
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
       invoiceDate: invoice.invoiceDate,
+      vatRate: invoice.vatRate,
     });
 
     const monthIndex = new Date(invoice.invoiceDate).getMonth();

@@ -8,10 +8,13 @@ import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { ViewNotice } from "@/components/invoice/ViewNotice";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
+/** Removes a trailing colon from labels like "Fakturadato:" */
+const lbl = (s: string) => s.replace(/:\s*$/, "");
+
 /**
  * Read-only invoice detail page. Confirms the invoice belongs to
- * the logged-in user, calculates the MVA breakdown and offers
- * status-change buttons.
+ * the logged-in user, calculates the MVA breakdown (using the
+ * invoice's own vatRate) and offers status-change buttons.
  */
 export default async function InvoiceViewPage({
   params,
@@ -43,6 +46,7 @@ export default async function InvoiceViewPage({
       lineItems: invoice.lineItems,
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
       invoiceDate: invoice.invoiceDate,
+      vatRate: invoice.vatRate,
     });
 
   const dateOptions = {
@@ -54,6 +58,9 @@ export default async function InvoiceViewPage({
     format.dateTime(new Date(d), dateOptions);
   const fmtMoney = (n: number) =>
     format.number(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const hasVatBreakdown =
+    invoice.mvaRegisteredFrom && (subtotalBefore > 0 || subtotalAfter > 0);
 
   return (
     <>
@@ -84,150 +91,193 @@ export default async function InvoiceViewPage({
 
         <StatusButtons invoiceId={invoice.id} currentStatus={invoice.status} />
 
-        <div className="rounded-lg border p-6 space-y-6 mt-6">
-          {/* Issuer / client */}
-          <div className="grid grid-cols-2 gap-6">
+        <div className="rounded-xl border border-[#d6e4db] bg-white overflow-hidden mt-6">
+          {/* Header: issuer */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4 px-6 py-5 border-b border-[#d6e4db]">
             <div>
-              <p className="text-sm text-gray-500 mb-1">{t("from")}</p>
-              <p className="font-medium">{invoice.issuerName}</p>
-              <p className="text-sm">
-                {t("orgNr")}: {invoice.issuerOrgNr}
+              <p className="text-xs text-gray-500 mb-1">{t("from")}</p>
+              <p className="font-semibold uppercase tracking-widest text-[#1f4d3f]">
+                {invoice.issuerName}
               </p>
-              <p className="text-sm">{invoice.issuerAddress}</p>
-              <p className="text-sm">{invoice.issuerPhone}</p>
-              <p className="text-sm">{invoice.issuerEmail}</p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">{t("billTo")}</p>
-              <p className="font-medium">{invoice.clientName}</p>
-              {invoice.clientOrgNr && (
-                <p className="text-sm">
-                  {t("orgNr")}: {invoice.clientOrgNr}
+            <div className="text-sm text-gray-600 sm:text-right space-y-0.5">
+              <p>{invoice.issuerEmail}</p>
+              <p>{invoice.issuerPhone}</p>
+              <p>{invoice.issuerAddress}</p>
+              <p>
+                {lbl(t("orgNr"))}: {invoice.issuerOrgNr}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Client box + invoice details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="rounded-lg bg-[#eaf3ee] p-4">
+                <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                  {t("billTo")}
                 </p>
-              )}
-              <p className="text-sm">{invoice.clientAddress}</p>
-              {invoice.clientEmail && (
-                <p className="text-sm">{invoice.clientEmail}</p>
-              )}
-            </div>
-          </div>
-
-          <hr />
-
-          {/* Invoice meta */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <p>
-              <span className="text-gray-500">{t("invoiceDate")}</span>{" "}
-              {fmtDate(invoice.invoiceDate)}
-            </p>
-            <p>
-              <span className="text-gray-500">{t("dueDate")}</span>{" "}
-              {fmtDate(invoice.dueDate)}
-            </p>
-            {invoice.periodStart && invoice.periodEnd && (
-              <p className="col-span-2">
-                <span className="text-gray-500">{t("period")}</span>{" "}
-                {fmtDate(invoice.periodStart)} – {fmtDate(invoice.periodEnd)}
-              </p>
-            )}
-            {invoice.projectRef && (
-              <p className="col-span-2">
-                <span className="text-gray-500">{t("projectRef")}</span>{" "}
-                {invoice.projectRef}
-              </p>
-            )}
-          </div>
-
-          <hr />
-
-          {/* Work log or fixed price */}
-          {invoice.billingType === "HOURLY" ? (
-            <div>
-              <p className="text-sm font-medium mb-2">{t("workLog")}</p>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left border-b text-gray-500">
-                    <th className="py-1 pr-4">{t("colDate")}</th>
-                    <th className="py-1 pr-4">{t("colDescription")}</th>
-                    <th className="py-1 pr-4">{t("colHours")}</th>
-                    <th className="py-1 pr-4">{t("colRate")}</th>
-                    <th className="py-1 pr-4">{t("colTotal")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoice.lineItems.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="py-1 pr-4">{fmtDate(item.date)}</td>
-                      <td className="py-1 pr-4">{item.description}</td>
-                      <td className="py-1 pr-4">{item.hours.toString()}</td>
-                      <td className="py-1 pr-4">{item.rate.toString()}</td>
-                      <td className="py-1 pr-4">
-                        {fmtMoney(Number(item.hours) * Number(item.rate))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-sm">
-              <span className="text-gray-500">{t("projectPrice")}</span>{" "}
-              {invoice.currency} {fmtMoney(Number(invoice.fixedPrice))}
-            </div>
-          )}
-
-          <hr />
-
-          {/* Totals, including MVA breakdown when applicable */}
-          <div className="space-y-1 text-sm">
-            {invoice.mvaRegisteredFrom &&
-              (subtotalBefore > 0 || subtotalAfter > 0) && (
-                <>
-                  {subtotalBefore > 0 && (
-                    <p>
-                      {t("workBefore")} — {invoice.currency}{" "}
-                      {fmtMoney(subtotalBefore)}{" "}
-                      <span className="text-gray-500">
-                        {t("workBeforeHint")}
-                      </span>
-                    </p>
-                  )}
-                  {subtotalAfter > 0 && (
-                    <p>
-                      {t("workAfter")} — {invoice.currency}{" "}
-                      {fmtMoney(subtotalAfter)}
-                    </p>
-                  )}
-                  <p>
-                    {t("vat")} = {invoice.currency} {fmtMoney(vatAmount)}
+                <p className="font-semibold">{invoice.clientName}</p>
+                {invoice.clientOrgNr && (
+                  <p className="text-sm">
+                    {lbl(t("orgNr"))}: {invoice.clientOrgNr}
                   </p>
-                </>
-              )}
+                )}
+                <p className="text-sm">{invoice.clientAddress}</p>
+                {invoice.clientEmail && (
+                  <p className="text-sm">{invoice.clientEmail}</p>
+                )}
+              </div>
 
-            {!invoice.mvaRegisteredFrom && (
-              <p className="text-gray-500 italic">{t("noVat")}</p>
+              <div className="text-sm space-y-2 pt-1">
+                <p className="flex justify-between gap-4">
+                  <span className="text-gray-500">{lbl(t("invoiceDate"))}</span>
+                  <span>{fmtDate(invoice.invoiceDate)}</span>
+                </p>
+                <p className="flex justify-between gap-4">
+                  <span className="text-gray-500">{lbl(t("dueDate"))}</span>
+                  <span>{fmtDate(invoice.dueDate)}</span>
+                </p>
+                {invoice.periodStart && invoice.periodEnd && (
+                  <p className="flex justify-between gap-4">
+                    <span className="text-gray-500">{lbl(t("period"))}</span>
+                    <span>
+                      {fmtDate(invoice.periodStart)} –{" "}
+                      {fmtDate(invoice.periodEnd)}
+                    </span>
+                  </p>
+                )}
+                {invoice.projectRef && (
+                  <p className="flex justify-between gap-4">
+                    <span className="text-gray-500">
+                      {lbl(t("projectRef"))}
+                    </span>
+                    <span>{invoice.projectRef}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Work log or fixed price */}
+            {invoice.billingType === "HOURLY" ? (
+              <div>
+                <p className="font-semibold text-[#1f4d3f] mb-2">
+                  {t("workLog")}
+                </p>
+                <div className="overflow-x-auto rounded-lg">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-[#dcebe2] text-left text-[#1f4d3f]">
+                        <th className="py-2 px-3 font-medium">{t("colDate")}</th>
+                        <th className="py-2 px-3 font-medium">
+                          {t("colDescription")}
+                        </th>
+                        <th className="py-2 px-3 font-medium text-right">
+                          {t("colHours")}
+                        </th>
+                        <th className="py-2 px-3 font-medium text-right">
+                          {t("colRate")}
+                        </th>
+                        <th className="py-2 px-3 font-medium text-right">
+                          {t("colTotal")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoice.lineItems.map((item) => (
+                        <tr
+                          key={item.id}
+                          className="odd:bg-white even:bg-[#f3f8f5]"
+                        >
+                          <td className="py-2 px-3">{fmtDate(item.date)}</td>
+                          <td className="py-2 px-3">{item.description}</td>
+                          <td className="py-2 px-3 text-right">
+                            {item.hours.toString()}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {fmtMoney(Number(item.rate))}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {fmtMoney(Number(item.hours) * Number(item.rate))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-between rounded-lg bg-[#f3f8f5] px-3 py-3 text-sm">
+                <span>{lbl(t("projectPrice"))}</span>
+                <span>
+                  {invoice.currency} {fmtMoney(Number(invoice.fixedPrice))}
+                </span>
+              </div>
             )}
 
-            <p className="text-lg font-semibold pt-2">
-              {t("totalDue")} {invoice.currency} {fmtMoney(grandTotal)}
-            </p>
-          </div>
+            {/* Totals, including MVA breakdown when applicable */}
+            <div className="rounded-lg border border-[#d6e4db] overflow-hidden text-sm">
+              <div className="p-4 space-y-1">
+                {hasVatBreakdown && (
+                  <>
+                    {subtotalBefore > 0 && (
+                      <div className="flex justify-between gap-4">
+                        <div>
+                          <p>{t("workBefore")}</p>
+                          <p className="text-xs text-gray-500">
+                            {t("workBeforeHint")}
+                          </p>
+                        </div>
+                        <p>
+                          {invoice.currency} {fmtMoney(subtotalBefore)}
+                        </p>
+                      </div>
+                    )}
+                    {subtotalAfter > 0 && (
+                      <div className="flex justify-between gap-4">
+                        <p>{t("workAfter", { rate: invoice.vatRate })}</p>
+                        <p>
+                          {invoice.currency} {fmtMoney(subtotalAfter)}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-between gap-4">
+                      <p>{t("vat", { rate: invoice.vatRate })}</p>
+                      <p>
+                        {invoice.currency} {fmtMoney(vatAmount)}
+                      </p>
+                    </div>
+                  </>
+                )}
 
-          <hr />
+                {!invoice.mvaRegisteredFrom && (
+                  <p className="text-gray-500 italic">{t("noVat")}</p>
+                )}
+              </div>
+              <div className="flex justify-between gap-4 bg-[#dcebe2] px-4 py-3 text-lg font-semibold text-[#1f4d3f]">
+                <span>{lbl(t("totalDue"))}</span>
+                <span>
+                  {invoice.currency} {fmtMoney(grandTotal)}
+                </span>
+              </div>
+            </div>
 
-          {/* Payment details */}
-          <div className="text-sm space-y-1">
-            <p className="font-medium mb-1">{t("paymentDetails")}</p>
-            <p>
-              {t("account")} {invoice.ibanOrAccount}
-            </p>
-            {invoice.bic && <p>BIC/SWIFT: {invoice.bic}</p>}
-            <p>
-              {t("bank")} {invoice.bankName}
-            </p>
-            <p>
-              {t("currency")} {invoice.currency}
-            </p>
+            {/* Payment details */}
+            <div className="rounded-lg border border-[#d6e4db] p-4 text-sm space-y-1">
+              <p className="font-semibold text-[#1f4d3f] mb-1">
+                {t("paymentDetails")}
+              </p>
+              <p>
+                {t("account")} {invoice.ibanOrAccount}
+              </p>
+              {invoice.bic && <p>BIC/SWIFT: {invoice.bic}</p>}
+              <p>
+                {t("bank")} {invoice.bankName}
+              </p>
+              <p>
+                {t("currency")} {invoice.currency}
+              </p>
+            </div>
           </div>
         </div>
       </main>

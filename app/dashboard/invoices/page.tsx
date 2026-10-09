@@ -91,32 +91,32 @@ export default async function InvoicesPage({
       {invoices.length === 0 ? (
         <p className="text-gray-500">{t("noInvoices")}</p>
       ) : (
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto rounded-xl border border-[#d6e4db]">
           <table className="w-full min-w-225 text-sm border-collapse text-left">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+              <tr className="bg-[#dcebe2] text-left text-[#1f4d3f]">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("number")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("client")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("date")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("due")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("type")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("amount")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("status")}
                 </th>
-                <th className="py-2 px-3 text-left whitespace-nowrap">
+                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("actions")}
                 </th>
               </tr>
@@ -126,29 +126,29 @@ export default async function InvoicesPage({
               {invoices.map((invoice, index) => (
                 <tr
                   key={invoice.id}
-                  className={index % 2 === 0 ? "bg-white" : "bg-green-50"}
+                  className={index % 2 === 0 ? "bg-white" : "bg-[#f3f8f5]"}
                 >
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {invoice.invoiceNumber}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {invoice.clientName}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {format.dateTime(new Date(invoice.invoiceDate), dateOptions)}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {format.dateTime(new Date(invoice.dueDate), dateOptions)}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {tBilling(invoice.billingType)}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {invoice.currency}{" "}
                     {format.number(
                       calculateInvoiceTotals({
@@ -159,16 +159,17 @@ export default async function InvoicesPage({
                         lineItems: invoice.lineItems,
                         mvaRegisteredFrom: invoice.mvaRegisteredFrom,
                         invoiceDate: invoice.invoiceDate,
+                        vatRate: invoice.vatRate,
                       }).grandTotal,
                       { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                     )}
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     <StatusBadge status={invoice.status} />
                   </td>
 
-                  <td className="py-2 px-3 text-left whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     <div className="flex gap-3">
                       <Link
                         href={`/dashboard/invoices/${invoice.id}`}

@@ -77,6 +77,22 @@ export default async function ReportsPage({
   const monthly = aggregateByMonth(invoices);
   const summary = summarizeYear(monthly);
 
+  // One calculation per invoice, using the invoice's own vatRate.
+  // The table rows and the totals row both come from these results.
+  const rows = invoices.map((invoice) => {
+    const { grandTotal, vatAmount } = calculateInvoiceTotals({
+      billingType: invoice.billingType,
+      fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
+      lineItems: invoice.lineItems,
+      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+      invoiceDate: invoice.invoiceDate,
+      vatRate: invoice.vatRate,
+    });
+    return { invoice, grandTotal, vatAmount };
+  });
+  const totalAmount = rows.reduce((sum, r) => sum + r.grandTotal, 0);
+  const totalVat = rows.reduce((sum, r) => sum + r.vatAmount, 0);
+
   const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   const pdfHref =
@@ -142,7 +158,7 @@ export default async function ReportsPage({
         />
       </div>
 
-      <div className="rounded-lg border p-6 mb-6">
+      <div className="rounded-xl border border-[#d6e4db] p-6 mb-6">
         <h2 className="text-sm font-medium text-gray-500 mb-4">
           {t("revenueByMonth", { year })}
           {selectedPeriod ? ` (${t(`periods.${selectedPeriod.id}`)})` : ""}
@@ -150,116 +166,78 @@ export default async function ReportsPage({
         <RevenueChart data={monthly} />
       </div>
 
-      <div className="rounded-lg border p-6">
+      <div className="rounded-xl border border-[#d6e4db] p-6">
         <h2 className="text-sm font-medium text-gray-500 mb-4">
           {t("invoicesInPeriod")}
         </h2>
 
-        {invoices.length === 0 ? (
+        {rows.length === 0 ? (
           <p className="text-gray-500 text-sm">{t("noInvoices")}</p>
         ) : (
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto rounded-lg border border-[#d6e4db] mb-6">
             <table className="w-full min-w-[600px] text-sm border-collapse text-left">
               <thead>
-                <tr className="text-left border-b">
-                  <th className="py-2 px-3 whitespace-nowrap">
+                <tr className="bg-[#dcebe2] text-left text-[#1f4d3f]">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colInvoice")}
                   </th>
-                  <th className="py-2 px-3 whitespace-nowrap">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colClient")}
                   </th>
-                  <th className="py-2 px-3 whitespace-nowrap">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colDate")}
                   </th>
-                  <th className="py-2 px-3 whitespace-nowrap">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colStatus")}
                   </th>
-                  <th className="py-2 px-3 whitespace-nowrap">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colAmount")}
                   </th>
-                  <th className="py-2 px-3 whitespace-nowrap">
+                  <th className="py-3 px-3 font-medium whitespace-nowrap">
                     {t("colVat")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((invoice, index) => {
-                  const { grandTotal, vatAmount } = calculateInvoiceTotals({
-                    billingType: invoice.billingType,
-                    fixedPrice: invoice.fixedPrice
-                      ? Number(invoice.fixedPrice)
-                      : null,
-                    lineItems: invoice.lineItems,
-                    mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                    invoiceDate: invoice.invoiceDate,
-                  });
-
-                  return (
-                    <tr
-                      key={invoice.id}
-                      className={
-                        (index % 2 === 0 ? "bg-white" : "bg-green-50") +
-                        " hover:bg-gray-100 transition-colors"
-                      }
-                    >
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {invoice.invoiceNumber}
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {invoice.clientName}
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {fmtDate(invoice.invoiceDate)}
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <StatusBadge status={invoice.status} />
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {fmtNok(grandTotal)}
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {fmtNok(vatAmount)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {rows.map(({ invoice, grandTotal, vatAmount }, index) => (
+                  <tr
+                    key={invoice.id}
+                    className={
+                      (index % 2 === 0 ? "bg-white" : "bg-[#f3f8f5]") +
+                      " hover:bg-[#eaf3ee] transition-colors"
+                    }
+                  >
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {invoice.invoiceNumber}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {invoice.clientName}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {fmtDate(invoice.invoiceDate)}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <StatusBadge status={invoice.status} />
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {fmtNok(grandTotal)}
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {fmtNok(vatAmount)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 font-semibold">
-                  <td className="py-2 px-3" colSpan={4}>
+                <tr className="bg-[#dcebe2] font-semibold text-[#1f4d3f]">
+                  <td className="py-3 px-3" colSpan={4}>
                     {t("total")}
                   </td>
-                  <td className="py-2 px-3 whitespace-nowrap">
-                    {fmtNok(
-                      invoices.reduce((sum, invoice) => {
-                        const { grandTotal } = calculateInvoiceTotals({
-                          billingType: invoice.billingType,
-                          fixedPrice: invoice.fixedPrice
-                            ? Number(invoice.fixedPrice)
-                            : null,
-                          lineItems: invoice.lineItems,
-                          mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                          invoiceDate: invoice.invoiceDate,
-                        });
-                        return sum + grandTotal;
-                      }, 0),
-                    )}
+                  <td className="py-3 px-3 whitespace-nowrap">
+                    {fmtNok(totalAmount)}
                   </td>
-                  <td className="py-2 px-3 whitespace-nowrap">
-                    {fmtNok(
-                      invoices.reduce((sum, invoice) => {
-                        const { vatAmount } = calculateInvoiceTotals({
-                          billingType: invoice.billingType,
-                          fixedPrice: invoice.fixedPrice
-                            ? Number(invoice.fixedPrice)
-                            : null,
-                          lineItems: invoice.lineItems,
-                          mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                          invoiceDate: invoice.invoiceDate,
-                        });
-                        return sum + vatAmount;
-                      }, 0),
-                    )}
+                  <td className="py-3 px-3 whitespace-nowrap">
+                    {fmtNok(totalVat)}
                   </td>
                 </tr>
               </tfoot>
@@ -295,17 +273,17 @@ function SummaryCard({
 }) {
   const cardClass =
     variant === "highlight"
-      ? "rounded-lg border p-5 bg-teal-50 border-teal-200"
+      ? "rounded-xl border p-5 bg-teal-50 border-teal-200"
       : variant === "warning"
-        ? "rounded-lg border p-5 bg-red-50 border-red-200"
-        : "rounded-lg border p-5";
+        ? "rounded-xl border p-5 bg-red-50 border-red-200"
+        : "rounded-xl border p-5 bg-[#eaf3ee] border-[#d6e4db]";
 
   const valueClass =
     variant === "highlight"
       ? "text-2xl font-bold text-teal-800"
       : variant === "warning"
         ? "text-2xl font-bold text-red-800"
-        : "text-2xl font-bold";
+        : "text-2xl font-bold text-[#1f4d3f]";
 
   return (
     <div className={cardClass}>
