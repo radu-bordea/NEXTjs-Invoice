@@ -309,6 +309,7 @@
     "taxNote": "Tax on income is the responsibility of the business owner and is not included in the invoice amount."
   },
   "ReportPDF": {
+    "orgNr": "Org.nr",
     "title": "Invoice Report",
     "period": "Period",
     "generated": "Generated",

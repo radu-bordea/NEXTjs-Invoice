@@ -1,3 +1,8 @@
+import { Font } from "@react-pdf/renderer"
+
+// Never split words with a hyphen (e.g. company names like "SOLU-TIONS")
+Font.registerHyphenationCallback((word) => [word])
+
 /**
  * Shared colors for the PDFs (invoice and report), so both documents
  * look like one product. Soft green palette.

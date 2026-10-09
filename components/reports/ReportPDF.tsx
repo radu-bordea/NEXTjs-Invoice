@@ -1,8 +1,8 @@
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer"
-import { calculateInvoiceTotals } from "@/lib/invoice-calculations"
-import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
-import type { PdfT } from "@/lib/pdf-i18n"
-import { pdfColors as c } from "@/lib/pdf-theme"
+import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
+import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client";
+import type { PdfT } from "@/lib/pdf-i18n";
+import { pdfColors as c } from "@/lib/pdf-theme";
 
 const styles = StyleSheet.create({
   page: {
@@ -24,11 +24,11 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 15,
-    letterSpacing: 2,
+    fontSize: 13,
+    letterSpacing: 1.5,
     color: c.dark,
     textTransform: "uppercase",
-    maxWidth: "55%",
+    maxWidth: "62%",
   },
   headerInfo: {
     alignItems: "flex-end",
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: c.muted,
   },
-})
+});
 
 /**
  * Printable summary of issued invoices for a period. Texts come from
@@ -143,15 +143,15 @@ export function ReportPDF({
   tStatus,
   dateLocale,
 }: {
-  invoices: (Invoice & { lineItems: WorkLogItem[] })[]
-  periodLabel: string
-  generatedAt: Date
-  t: PdfT
-  tStatus: PdfT
-  dateLocale: string
+  invoices: (Invoice & { lineItems: WorkLogItem[] })[];
+  periodLabel: string;
+  generatedAt: Date;
+  t: PdfT;
+  tStatus: PdfT;
+  dateLocale: string;
 }) {
   const fmtInt = (n: number) =>
-    n.toLocaleString(dateLocale, { maximumFractionDigits: 0 })
+    n.toLocaleString(dateLocale, { maximumFractionDigits: 0 });
 
   const rows = invoices.map((invoice) => {
     const { grandTotal, vatAmount } = calculateInvoiceTotals({
@@ -161,16 +161,16 @@ export function ReportPDF({
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
       invoiceDate: invoice.invoiceDate,
       vatRate: invoice.vatRate,
-    })
-    return { invoice, grandTotal, vatAmount }
-  })
+    });
+    return { invoice, grandTotal, vatAmount };
+  });
 
-  const totalAmount = rows.reduce((sum, r) => sum + r.grandTotal, 0)
-  const totalVat = rows.reduce((sum, r) => sum + r.vatAmount, 0)
+  const totalAmount = rows.reduce((sum, r) => sum + r.grandTotal, 0);
+  const totalVat = rows.reduce((sum, r) => sum + r.vatAmount, 0);
 
   // Company name/org.nr for the header come from the invoices
   // themselves (they snapshot the issuer), so no extra prop is needed.
-  const issuer = invoices[0]
+  const issuer = invoices[0];
 
   return (
     <Document>
@@ -236,7 +236,11 @@ export function ReportPDF({
               <Text style={styles.colNumber}>{invoice.invoiceNumber}</Text>
               <Text style={styles.colClient}>{invoice.clientName}</Text>
               <Text style={styles.colDate}>
-                {new Date(invoice.invoiceDate).toLocaleDateString(dateLocale)}
+                {new Date(invoice.invoiceDate).toLocaleDateString(dateLocale, {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
               </Text>
               <Text style={styles.colStatus}>{tStatus(invoice.status)}</Text>
               <Text style={styles.colAmount}>{fmtInt(grandTotal)}</Text>
@@ -267,5 +271,5 @@ export function ReportPDF({
         </View>
       </Page>
     </Document>
-  )
+  );
 }

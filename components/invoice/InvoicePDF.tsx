@@ -1,14 +1,8 @@
-import {
-  Document,
-  Page,
-  View,
-  Text,
-  StyleSheet,
-} from "@react-pdf/renderer"
-import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client"
-import { calculateInvoiceTotals } from "@/lib/invoice-calculations"
-import type { PdfT } from "@/lib/pdf-i18n"
-import { pdfColors as c } from "@/lib/pdf-theme"
+import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import type { Invoice, WorkLogItem } from "@/app/generated/prisma/client";
+import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
+import type { PdfT } from "@/lib/pdf-i18n";
+import { pdfColors as c } from "@/lib/pdf-theme";
 
 /**
  * React-PDF styles. This is a JS object passed to StyleSheet.create —
@@ -37,11 +31,11 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 15,
-    letterSpacing: 2,
+    fontSize: 13,
+    letterSpacing: 1.5,
     color: c.dark,
     textTransform: "uppercase",
-    maxWidth: "55%",
+    maxWidth: "62%",
   },
   contact: {
     alignItems: "flex-end",
@@ -220,7 +214,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: c.muted,
   },
-})
+});
 
 /**
  * The printable invoice layout, rendered with React-PDF's own
@@ -237,9 +231,9 @@ export function InvoicePDF({
   t,
   dateLocale,
 }: {
-  invoice: Invoice & { lineItems: WorkLogItem[] }
-  t: PdfT
-  dateLocale: string
+  invoice: Invoice & { lineItems: WorkLogItem[] };
+  t: PdfT;
+  dateLocale: string;
 }) {
   const { subtotalBefore, subtotalAfter, vatAmount, grandTotal } =
     calculateInvoiceTotals({
@@ -249,22 +243,22 @@ export function InvoicePDF({
       mvaRegisteredFrom: invoice.mvaRegisteredFrom,
       invoiceDate: invoice.invoiceDate,
       vatRate: invoice.vatRate,
-    })
+    });
 
   const fmtDate = (d: Date | string) =>
     new Date(d).toLocaleDateString(dateLocale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    })
+    });
   const fmtMoney = (n: number) =>
     n.toLocaleString(dateLocale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })
+    });
 
   const hasVatBreakdown =
-    invoice.mvaRegisteredFrom && (subtotalBefore > 0 || subtotalAfter > 0)
+    invoice.mvaRegisteredFrom && (subtotalBefore > 0 || subtotalAfter > 0);
 
   return (
     <Document>
@@ -288,7 +282,6 @@ export function InvoicePDF({
 
         {/* Title */}
         <Text style={styles.title}>{t("title")}</Text>
-        <Text style={styles.subtitle}>{invoice.invoiceNumber}</Text>
 
         {/* Client + invoice details */}
         <View style={styles.twoCol}>
@@ -461,5 +454,5 @@ export function InvoicePDF({
         </View>
       </Page>
     </Document>
-  )
+  );
 }

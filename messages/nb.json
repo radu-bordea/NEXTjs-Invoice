@@ -309,6 +309,7 @@
     "taxNote": "Skatt på inntekt er forretningseierens ansvar og er ikke inkludert i fakturabeløpet."
   },
   "ReportPDF": {
+    "orgNr": "Org.nr",
     "title": "Fakturarapport",
     "period": "Periode",
     "generated": "Generert",
