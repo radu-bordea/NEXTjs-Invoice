@@ -58,6 +58,8 @@ async function getNextInvoiceNumber(userId: string): Promise<string> {
  * invoices. Also snapshots mvaRegisteredFrom the same way, for the
  * per-line-item VAT calculation we'll do at PDF-generation time.
  *
+ * The MVA rate (vatRate) is chosen per invoice on the form.
+ *
  * On failed validation, echoes back the submitted values so the
  * form doesn't reset to blank — same pattern as CompanyProfile.
  *
@@ -119,6 +121,7 @@ export async function createInvoice(
     billingType: formData.get("billingType"),
     fixedPrice: formData.get("fixedPrice") || undefined,
     currency: formData.get("currency") || "NOK",
+    vatRate: formData.get("vatRate") || undefined,
     lineItems,
     // invoiceNumber is generated server-side below, not submitted
     // by the form — placeholder here just so the schema has
@@ -145,6 +148,7 @@ export async function createInvoice(
         projectRef: String(raw.projectRef ?? ""),
         currency: String(raw.currency ?? "NOK"),
         fixedPrice: String(raw.fixedPrice ?? ""),
+        vatRate: String(raw.vatRate ?? "25"),
       },
     };
   }
@@ -176,6 +180,7 @@ export async function createInvoice(
       billingType: data.billingType,
       fixedPrice: data.fixedPrice ?? null,
       currency: data.currency,
+      vatRate: data.vatRate,
 
       ibanOrAccount: companyProfile.ibanOrAccount,
       bic: companyProfile.bic,
@@ -293,6 +298,7 @@ export async function updateInvoice(
     billingType: formData.get("billingType"),
     fixedPrice: formData.get("fixedPrice") || undefined,
     currency: formData.get("currency") || "NOK",
+    vatRate: formData.get("vatRate") || undefined,
     lineItems,
     // Keep the existing invoice number — it's immutable once
     // assigned, never regenerated on edit.
@@ -318,6 +324,7 @@ export async function updateInvoice(
         projectRef: String(raw.projectRef ?? ""),
         currency: String(raw.currency ?? "NOK"),
         fixedPrice: String(raw.fixedPrice ?? ""),
+        vatRate: String(raw.vatRate ?? "25"),
       },
     };
   }
@@ -341,6 +348,7 @@ export async function updateInvoice(
       billingType: data.billingType,
       fixedPrice: data.fixedPrice ?? null,
       currency: data.currency,
+      vatRate: data.vatRate,
 
       // Delete-then-recreate: the simplest reliable way to sync a
       // related array in Prisma without diffing individual rows.

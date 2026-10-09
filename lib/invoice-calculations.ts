@@ -1,10 +1,10 @@
 import type { WorkLogItem } from "@/app/generated/prisma/client"
 
 /**
- * The MVA rate applied once a business is registered — 25%,
- * the standard Norwegian rate this app supports.
+ * The default MVA rate: 25%, the standard Norwegian rate.
+ * Other supported rates (15, 12, 0) are chosen per invoice.
  */
-const MVA_RATE = 0.25
+export const DEFAULT_MVA_RATE = 25
 
 /**
  * Result of calculating an invoice's totals, including the
@@ -22,25 +22,18 @@ export type InvoiceTotals = {
 /**
  * Calculates an invoice's totals.
  *
- * For FIXED invoices, MVA applies as an all-or-nothing decision
- * based on the invoice's own date compared to mvaRegisteredFrom —
- * there's no per-line-item date range to split, so the whole price
- * is either taxed or not.
+ * Two independent decisions:
+ * 1. WHETHER MVA applies: depends on mvaRegisteredFrom (the date the
+ *    business registered). Work before that date is never taxed.
+ * 2. HOW MUCH: vatRate (percent) chosen on the invoice, e.g. 25, 15, 12, 0.
  *
- * For HOURLY invoices, splits line items into "before" and "after"
- * the invoice's snapshotted mvaRegisteredFrom date, sums each
- * group separately, and applies 25% VAT only to the "after" group.
+ * For FIXED invoices it is all-or-nothing, based on the invoice date.
+ * For HOURLY invoices, line items are split into "before" and "after"
+ * the registration date, and VAT is applied only to the "after" group.
  *
- * If mvaRegisteredFrom is null (never registered), nothing is
- * taxed in either case.
+ * If mvaRegisteredFrom is null (never registered), nothing is taxed.
  *
- * @param billingType - "HOURLY" or "FIXED"
- * @param fixedPrice - the flat price, used only when billingType is FIXED
- * @param lineItems - the work log rows, used only when billingType is HOURLY
- * @param mvaRegisteredFrom - the invoice's snapshotted MVA registration
- *   date, or null if not registered at the time this invoice was created
- * @param invoiceDate - the invoice's own date, used for the FIXED
- *   all-or-nothing MVA decision
+ * @param vatRate - percent, e.g. 25. Defaults to 25.
  */
 export function calculateInvoiceTotals({
   billingType,
@@ -48,13 +41,17 @@ export function calculateInvoiceTotals({
   lineItems,
   mvaRegisteredFrom,
   invoiceDate,
+  vatRate = DEFAULT_MVA_RATE,
 }: {
   billingType: "HOURLY" | "FIXED"
   fixedPrice: number | null
   lineItems: WorkLogItem[]
   mvaRegisteredFrom: Date | null
   invoiceDate: Date
+  vatRate?: number
 }): InvoiceTotals {
+  const rate = vatRate / 100
+
   if (billingType === "FIXED") {
     const price = fixedPrice ?? 0
     const isTaxable =
@@ -63,8 +60,8 @@ export function calculateInvoiceTotals({
     return {
       subtotalBefore: isTaxable ? 0 : price,
       subtotalAfter: isTaxable ? price : 0,
-      vatAmount: isTaxable ? price * MVA_RATE : 0,
-      grandTotal: isTaxable ? price + price * MVA_RATE : price,
+      vatAmount: isTaxable ? price * rate : 0,
+      grandTotal: isTaxable ? price + price * rate : price,
     }
   }
 
@@ -83,7 +80,7 @@ export function calculateInvoiceTotals({
     (sum, item) => sum + Number(item.hours) * Number(item.rate),
     0
   )
-  const vatAmount = subtotalAfter * MVA_RATE
+  const vatAmount = subtotalAfter * rate
 
   return {
     subtotalBefore,

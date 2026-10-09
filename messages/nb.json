@@ -126,7 +126,9 @@
     "projectPrice": "Prosjektpris",
     "saving": "Lagrer...",
     "saveChanges": "Lagre endringer",
-    "create": "Opprett faktura"
+    "create": "Opprett faktura",
+    "vatRate": "MVA-sats",
+    "vatRateHint": "Gjelder kun arbeid etter at du er MVA-registrert. Vanlig sats for tjenester er 25 %."
   },
   "NewInvoice": {
     "title": "Ny faktura",
@@ -267,7 +269,8 @@
     "clientAddressRequired": "Kundens adresse er påkrevd",
     "lineItemsRequired": "Legg til minst én rad i timelisten for en timebasert faktura",
     "fixedPriceRequired": "Fastpris er påkrevd for en fastprisfaktura",
-    "fixedPricePositive": "Fastpris må være større enn 0"
+    "fixedPricePositive": "Fastpris må være større enn 0",
+    "vatRateInvalid": "Velg en gyldig MVA-sats"
   },
   "InvoiceActions": {
     "quotaReached": "Grensen for gratisplanen er nådd: {limit} fakturaer per måned. Oppgrader til Pro for ubegrenset antall fakturaer.",
@@ -320,7 +323,7 @@
     "total": "Totalt",
     "footer": "Inkluderer utstedte fakturaer (sendte og betalte) etter fakturadato; utkast er ikke med. Dette er en personlig oversikt generert fra dine egne fakturadata. Den erstatter ikke innsending av MVA-melding til Skatteetaten via Altinn."
   },
-    "Legal": {
+  "Legal": {
     "lastUpdated": "Sist oppdatert: {date}"
   },
   "Terms": {

@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model CompanyProfile {
   id                String    @id @default(cuid())
   userId            String    @unique
@@ -27,13 +26,13 @@ model CompanyProfile {
   bic               String?
   bankName          String
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Invoice {
-  id            String   @id @default(cuid())
-  userId        String
+  id     String @id @default(cuid())
+  userId String
 
   invoiceNumber String
   invoiceDate   DateTime
@@ -53,9 +52,10 @@ model Invoice {
   clientAddress String
   clientEmail   String?
 
-  billingType   BillingType
-  fixedPrice    Decimal?
-  currency      String      @default("NOK")
+  billingType BillingType
+  fixedPrice  Decimal?
+  currency    String      @default("NOK")
+  vatRate     Int         @default(25)
 
   ibanOrAccount String
   bic           String?
@@ -63,12 +63,12 @@ model Invoice {
 
   mvaRegisteredFrom DateTime?
 
-  status        InvoiceStatus @default(DRAFT)
+  status InvoiceStatus @default(DRAFT)
 
-  lineItems     WorkLogItem[]
+  lineItems WorkLogItem[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, invoiceNumber])
 }
@@ -104,9 +104,9 @@ model Subscription {
   userId               String    @unique
   stripeCustomerId     String    @unique
   stripeSubscriptionId String?   @unique
-  status               String    // "active", "canceled", "past_due", "incomplete", etc.
+  status               String // "active", "canceled", "past_due", "incomplete", etc.
   currentPeriodEnd     DateTime?
-  cancelAtPeriodEnd Boolean @default(false)
+  cancelAtPeriodEnd    Boolean   @default(false)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }

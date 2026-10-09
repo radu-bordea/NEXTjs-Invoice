@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 /**
  * A single row in the invoice's work log — one line of billed work.
@@ -9,7 +9,7 @@ const workLogItemSchema = z.object({
   description: z.string().min(1, "descriptionRequired"),
   hours: z.coerce.number().positive("hoursPositive"),
   rate: z.coerce.number().positive("ratePositive"),
-})
+});
 
 /**
  * Base fields shared by every invoice, regardless of billing type.
@@ -33,9 +33,13 @@ const baseInvoiceSchema = z.object({
   billingType: z.enum(["HOURLY", "FIXED"]),
   fixedPrice: z.coerce.number().positive("fixedPricePositive").optional(),
   currency: z.literal("NOK").default("NOK"),
+  vatRate: z.coerce
+    .number()
+    .refine((v) => [0, 12, 15, 25].includes(v), "vatRateInvalid")
+    .default(25),
 
   lineItems: z.array(workLogItemSchema).optional(),
-})
+});
 
 /**
  * Full invoice schema with conditional validation:
@@ -53,7 +57,7 @@ export const invoiceSchema = baseInvoiceSchema.superRefine((data, ctx) => {
         code: "custom",
         message: "lineItemsRequired",
         path: ["lineItems"],
-      })
+      });
     }
   }
 
@@ -63,9 +67,9 @@ export const invoiceSchema = baseInvoiceSchema.superRefine((data, ctx) => {
         code: "custom",
         message: "fixedPriceRequired",
         path: ["fixedPrice"],
-      })
+      });
     }
   }
-})
+});
 
-export type InvoiceInput = z.infer<typeof invoiceSchema>
+export type InvoiceInput = z.infer<typeof invoiceSchema>;

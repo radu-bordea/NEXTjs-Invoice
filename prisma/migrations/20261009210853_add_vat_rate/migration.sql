@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Invoice" ADD COLUMN     "vatRate" INTEGER NOT NULL DEFAULT 25;

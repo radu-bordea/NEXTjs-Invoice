@@ -283,6 +283,29 @@ export function InvoiceForm({
           }
           error={state.errors?.projectRef}
         />
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            {t("vatRate")}
+          </label>
+          <select
+            name="vatRate"
+            defaultValue={
+              state.submittedValues?.vatRate ?? String(source?.vatRate ?? 25)
+            }
+            className="w-full px-4 py-2 border rounded-lg bg-white"
+          >
+            <option value="25">25 %</option>
+            <option value="15">15 %</option>
+            <option value="12">12 %</option>
+            <option value="0">0 %</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">{t("vatRateHint")}</p>
+          {state.errors?.vatRate && (
+            <p className="text-sm text-red-600 mt-1">
+              {tr(state.errors.vatRate[0])}
+            </p>
+          )}
+        </div>
         <input type="hidden" name="currency" value="NOK" />
       </fieldset>
 
@@ -403,7 +426,7 @@ export function InvoiceForm({
           </p>
 
           {state.errors?.lineItems && (
-                        <p className="text-sm text-red-600">
+            <p className="text-sm text-red-600">
               {tr(state.errors.lineItems[0])}
             </p>
           )}

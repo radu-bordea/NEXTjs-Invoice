@@ -126,7 +126,9 @@
     "projectPrice": "Project price",
     "saving": "Saving...",
     "saveChanges": "Save changes",
-    "create": "Create invoice"
+    "create": "Create invoice",
+    "vatRate": "VAT rate",
+    "vatRateHint": "Applies only to work after your MVA registration date. The standard rate for services is 25%."
   },
   "NewInvoice": {
     "title": "New invoice",
@@ -267,7 +269,8 @@
     "clientAddressRequired": "Client address is required",
     "lineItemsRequired": "Add at least one work log entry for an hourly invoice",
     "fixedPriceRequired": "Fixed price is required for a fixed-price invoice",
-    "fixedPricePositive": "Fixed price must be greater than 0"
+    "fixedPricePositive": "Fixed price must be greater than 0",
+    "vatRateInvalid": "Choose a valid VAT rate"
   },
   "InvoiceActions": {
     "quotaReached": "Free plan limit reached: {limit} invoices per month. Upgrade to Pro for unlimited invoices.",
