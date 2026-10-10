@@ -80,12 +80,12 @@ export default async function InvoiceViewPage({
             >
               {t("edit")}
             </Link>
-            <Link
+            <a
               href={`/dashboard/invoices/${invoice.id}/pdf`}
               className="px-4 py-2 rounded-lg border-b text-sm hover:bg-gray-50 cursor-pointer"
             >
               {t("downloadPdf")}
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -168,7 +168,9 @@ export default async function InvoiceViewPage({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-[#dcebe2] text-left text-[#1f4d3f]">
-                        <th className="py-2 px-3 font-medium">{t("colDate")}</th>
+                        <th className="py-2 px-3 font-medium">
+                          {t("colDate")}
+                        </th>
                         <th className="py-2 px-3 font-medium">
                           {t("colDescription")}
                         </th>

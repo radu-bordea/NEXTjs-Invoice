@@ -137,7 +137,10 @@ export default async function InvoicesPage({
                   </td>
 
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">
-                    {format.dateTime(new Date(invoice.invoiceDate), dateOptions)}
+                    {format.dateTime(
+                      new Date(invoice.invoiceDate),
+                      dateOptions,
+                    )}
                   </td>
 
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">
@@ -193,7 +196,7 @@ export default async function InvoicesPage({
                         />
                       </Link>
 
-                      <Link
+                      <a
                         href={`/dashboard/invoices/${invoice.id}/pdf`}
                         className="text-gray-600 hover:text-teal-700"
                         title={t("downloadPdf")}
@@ -202,7 +205,7 @@ export default async function InvoicesPage({
                           className="text-red-700 cursor-pointer"
                           size={16}
                         />
-                      </Link>
+                      </a>
 
                       <Link
                         href={`/dashboard/invoices/new?from=${invoice.id}`}

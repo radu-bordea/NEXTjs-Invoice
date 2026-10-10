@@ -41,10 +41,7 @@ export default async function ReportsPage({
     return (
       <main className="p-4 sm:p-8 max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
-        <UpgradePrompt
-          title={t("lockedTitle")}
-          message={t("lockedMessage")}
-        />
+        <UpgradePrompt title={t("lockedTitle")} message={t("lockedMessage")} />
       </main>
     );
   }
@@ -245,13 +242,13 @@ export default async function ReportsPage({
           </div>
         )}
 
-        <Link
+        <a
           href={pdfHref}
           download={`report-${selectedPeriod ? selectedPeriod.id : "year-" + year}.pdf`}
           className="inline-block bg-teal-700 text-white rounded-full font-medium px-6 py-3 hover:bg-teal-800 transition-colors cursor-pointer"
         >
           {t("downloadPdf")}
-        </Link>
+        </a>
       </div>
     </main>
   );
