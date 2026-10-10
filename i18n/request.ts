@@ -13,7 +13,10 @@ export default getRequestConfig(async () => {
     : defaultLocale
 
   return {
-    locale,
+    // English uses British formatting (day/month/year), which matches
+    // the PDFs and is what Norwegian users expect. Messages still come
+    // from the short locale ("en") below.
+    locale: locale === "en" ? "en-GB" : locale,
     messages: (await import(`../messages/${locale}.json`)).default,
   }
 })
