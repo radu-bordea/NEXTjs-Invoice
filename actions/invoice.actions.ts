@@ -275,6 +275,15 @@ export async function updateInvoice(
     };
   }
 
+  // Drafts follow the CURRENT company profile when edited: the MVA
+  // registration date is re-read here. Sent/paid invoices never reach
+  // this point (blocked above), so issued invoices keep their snapshot.
+  const companyProfile = await prisma.companyProfile.findUnique({
+    where: { userId },
+    select: { mvaRegisteredFrom: true },
+  });
+  const currentMvaRegisteredFrom = companyProfile?.mvaRegisteredFrom ?? null;
+
   const lineItemsRaw = formData.get("lineItems");
   let lineItems: unknown[] = [];
   if (typeof lineItemsRaw === "string" && lineItemsRaw.length > 0) {
@@ -348,7 +357,11 @@ export async function updateInvoice(
       billingType: data.billingType,
       fixedPrice: data.fixedPrice ?? null,
       currency: data.currency,
-      vatRate: existingInvoice.mvaRegisteredFrom ? data.vatRate : 25,
+
+      // Follow the current profile: refresh the registration date and
+      // only accept a non-25% rate when the user is registered.
+      mvaRegisteredFrom: currentMvaRegisteredFrom,
+      vatRate: currentMvaRegisteredFrom ? data.vatRate : 25,
 
       // Delete-then-recreate: the simplest reliable way to sync a
       // related array in Prisma without diffing individual rows.
@@ -368,7 +381,6 @@ export async function updateInvoice(
   revalidatePath("/dashboard/invoices");
   redirect(`/dashboard/invoices/${invoiceId}`);
 }
-
 /**
  * Returns the logged-in user's distinct past clients, most
  * recently used first. Powers the client-prefill autocomplete on

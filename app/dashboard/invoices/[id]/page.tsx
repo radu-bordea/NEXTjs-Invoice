@@ -106,6 +106,10 @@ export default async function InvoiceViewPage({
               <p>{invoice.issuerAddress}</p>
               <p>
                 {lbl(t("orgNr"))}: {invoice.issuerOrgNr}
+                {invoice.mvaRegisteredFrom &&
+                invoice.invoiceDate >= invoice.mvaRegisteredFrom
+                  ? " MVA"
+                  : ""}
               </p>
             </div>
           </div>
@@ -153,6 +157,13 @@ export default async function InvoiceViewPage({
                       {lbl(t("projectRef"))}
                     </span>
                     <span>{invoice.projectRef}</span>
+                  </p>
+                )}
+                {invoice.mvaRegisteredFrom && (
+                  <p className="text-xs text-gray-500">
+                    {t("mvaRegisteredFrom", {
+                      date: fmtDate(invoice.mvaRegisteredFrom),
+                    })}
                   </p>
                 )}
               </div>

@@ -167,7 +167,8 @@
     "paymentDetails": "Payment details",
     "account": "IBAN / account:",
     "bank": "Bank:",
-    "currency": "Currency:"
+    "currency": "Currency:",
+    "mvaRegisteredFrom": "MVA-registered from {date}"
   },
   "StatusButtons": {
     "markSent": "Mark as sent",

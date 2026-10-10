@@ -51,12 +51,6 @@ const styles = StyleSheet.create({
     fontSize: 34,
     color: c.dark,
     marginTop: 20,
-  },
-  subtitle: {
-    fontFamily: "Times-Roman",
-    fontSize: 13,
-    color: c.dark,
-    marginTop: 2,
     marginBottom: 18,
   },
 
@@ -276,6 +270,10 @@ export function InvoicePDF({
             <Text style={styles.contactLine}>{invoice.issuerAddress}</Text>
             <Text style={styles.contactLine}>
               {t("orgNr")}: {invoice.issuerOrgNr}
+              {invoice.mvaRegisteredFrom &&
+              invoice.invoiceDate >= invoice.mvaRegisteredFrom
+                ? " MVA"
+                : ""}
             </Text>
           </View>
         </View>
@@ -323,6 +321,13 @@ export function InvoicePDF({
                 <Text style={styles.metaLabel}>{t("projectRef")}</Text>
                 <Text>{invoice.projectRef}</Text>
               </View>
+            ) : null}
+            {invoice.mvaRegisteredFrom ? (
+              <Text style={{ fontSize: 8, color: c.muted, marginTop: 2 }}>
+                {t("mvaRegisteredFrom", {
+                  date: fmtDate(invoice.mvaRegisteredFrom),
+                })}
+              </Text>
             ) : null}
           </View>
         </View>

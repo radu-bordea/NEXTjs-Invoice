@@ -64,11 +64,9 @@ export function InvoiceForm({
   const isEditMode = Boolean(invoice);
   const source = invoice ?? template;
 
-  // When editing, use the invoice's own snapshot of the registration date;
-  // for new invoices, use what the page tells us about the company profile.
-  const showVatRate = invoice
-    ? Boolean(invoice.mvaRegisteredFrom)
-    : mvaRegistered;
+  // Both new and edited invoices follow the current company profile
+  // (the page passes mvaRegistered). Sent/paid invoices are never edited.
+  const showVatRate = mvaRegistered;
 
   const action = isEditMode
     ? updateInvoice.bind(null, invoice!.id)

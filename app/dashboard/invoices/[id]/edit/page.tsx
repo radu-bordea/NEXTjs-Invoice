@@ -40,12 +40,20 @@ export default async function EditInvoicePage({
     redirect(`/dashboard/invoices/${invoice.id}?notice=edit-blocked`);
   }
 
+  // Drafts follow the CURRENT company profile when edited, so the form
+  // shows the VAT rate dropdown only if the user is registered now.
+  const companyProfile = await prisma.companyProfile.findUnique({
+    where: { userId },
+    select: { mvaRegisteredFrom: true },
+  });
+  const mvaRegistered = Boolean(companyProfile?.mvaRegisteredFrom);
+
   return (
     <main className="max-w-3xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">
         {t("title", { number: invoice.invoiceNumber })}
       </h1>
-      <InvoiceForm invoice={invoice} />
+      <InvoiceForm invoice={invoice} mvaRegistered={mvaRegistered} />
     </main>
   );
 }

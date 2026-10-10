@@ -167,7 +167,8 @@
     "paymentDetails": "Betalingsinformasjon",
     "account": "IBAN / kontonummer:",
     "bank": "Bank:",
-    "currency": "Valuta:"
+    "currency": "Valuta:",
+    "mvaRegisteredFrom": "MVA-registrert fra {date}"
   },
   "StatusButtons": {
     "markSent": "Marker som sendt",
