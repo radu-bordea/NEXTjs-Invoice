@@ -180,7 +180,7 @@ export async function createInvoice(
       billingType: data.billingType,
       fixedPrice: data.fixedPrice ?? null,
       currency: data.currency,
-      vatRate: data.vatRate,
+      vatRate: companyProfile.mvaRegisteredFrom ? data.vatRate : 25,
 
       ibanOrAccount: companyProfile.ibanOrAccount,
       bic: companyProfile.bic,
@@ -348,7 +348,7 @@ export async function updateInvoice(
       billingType: data.billingType,
       fixedPrice: data.fixedPrice ?? null,
       currency: data.currency,
-      vatRate: data.vatRate,
+      vatRate: existingInvoice.mvaRegisteredFrom ? data.vatRate : 25,
 
       // Delete-then-recreate: the simplest reliable way to sync a
       // related array in Prisma without diffing individual rows.

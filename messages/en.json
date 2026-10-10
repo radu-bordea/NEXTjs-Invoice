@@ -128,7 +128,8 @@
     "saveChanges": "Save changes",
     "create": "Create invoice",
     "vatRate": "VAT rate",
-    "vatRateHint": "Applies only to work after your MVA registration date. The standard rate for services is 25%."
+    "vatRateHint": "Applies only to work after your MVA registration date. The standard rate for services is 25%.",
+    "vatNotRegistered": "You are not MVA-registered, so no VAT is added to this invoice. Add your registration date in the company profile once you are registered."
   },
   "NewInvoice": {
     "title": "New invoice",

@@ -17,6 +17,14 @@ export default async function NewInvoicePage({
   const t = await getTranslations("NewInvoice")
   const quota = await getInvoiceQuota(userId)
 
+  // Is the user MVA-registered right now? Decides whether the form
+  // shows the VAT rate dropdown or the "not registered" note.
+  const companyProfile = await prisma.companyProfile.findUnique({
+    where: { userId },
+    select: { mvaRegisteredFrom: true },
+  })
+  const mvaRegistered = Boolean(companyProfile?.mvaRegisteredFrom)
+
   // Build a prefilled "template" from an existing invoice.
   // Nothing is saved here. It only fills the form.
   let template = undefined
@@ -55,7 +63,7 @@ export default async function NewInvoicePage({
               {t("usage", { used: quota.used, limit: quota.limit })}
             </p>
           )}
-          <InvoiceForm template={template} />
+          <InvoiceForm template={template} mvaRegistered={mvaRegistered} />
         </>
       )}
     </main>

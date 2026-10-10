@@ -128,7 +128,8 @@
     "saveChanges": "Lagre endringer",
     "create": "Opprett faktura",
     "vatRate": "MVA-sats",
-    "vatRateHint": "Gjelder kun arbeid etter at du er MVA-registrert. Vanlig sats for tjenester er 25 %."
+    "vatRateHint": "Gjelder kun arbeid etter at du er MVA-registrert. Vanlig sats for tjenester er 25 %.",
+    "vatNotRegistered": "Du er ikke MVA-registrert, så det legges ikke til MVA på denne fakturaen. Legg inn registreringsdato i firmaprofilen når du blir MVA-registrert."
   },
   "NewInvoice": {
     "title": "Ny faktura",
