@@ -308,7 +308,8 @@
     "account": "IBAN / kontonummer",
     "bank": "Bank",
     "currency": "Valuta",
-    "taxNote": "Skatt på inntekt er forretningseierens ansvar og er ikke inkludert i fakturabeløpet."
+    "taxNote": "Skatt på inntekt er forretningseierens ansvar og er ikke inkludert i fakturabeløpet.",
+    "mvaRegisteredFrom": "MVA-registrert fra {date}"
   },
   "ReportPDF": {
     "orgNr": "Org.nr",

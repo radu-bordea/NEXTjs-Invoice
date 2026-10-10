@@ -308,7 +308,8 @@
     "account": "IBAN / account",
     "bank": "Bank",
     "currency": "Currency",
-    "taxNote": "Tax on income is the responsibility of the business owner and is not included in the invoice amount."
+    "taxNote": "Tax on income is the responsibility of the business owner and is not included in the invoice amount.",
+    "mvaRegisteredFrom": "MVA-registered from {date}"
   },
   "ReportPDF": {
     "orgNr": "Org.nr",
