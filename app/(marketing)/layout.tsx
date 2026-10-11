@@ -1,24 +1,28 @@
-import Link from "next/link"
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
-import { useTranslations } from "next-intl"
-import { Footer } from "@/components/Footer"
-import { LanguageSwitcher } from "@/components/LanguageSwitcher"
+import Link from "next/link";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
+import { Footer } from "@/components/Footer";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Brand } from "@/components/Brand";
 
 export default function MarketingLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const t = useTranslations("Nav")
+  const t = useTranslations("Nav");
 
   return (
     <div className="flex flex-col flex-1">
-      <header className="flex justify-between items-center p-4 h-16">
-        <Link href="/" className="font-semibold text-lg hover:text-teal-700">
-          nextjs-invoice
+      <header className="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 px-4 py-3 min-h-16">
+        <Link href="/" className="group">
+          <Brand />
         </Link>
-        <div className="flex gap-4 items-center">
-          <Link href="/pricing" className="text-sm font-medium hover:text-teal-700">
+        <div className="flex flex-wrap gap-3 sm:gap-4 items-center">
+          <Link
+            href="/pricing"
+            className="text-sm font-medium hover:text-teal-700"
+          >
             {t("pricing")}
           </Link>
           <LanguageSwitcher />
@@ -48,5 +52,5 @@ export default function MarketingLayout({
       <div className="flex-1 flex flex-col">{children}</div>
       <Footer />
     </div>
-  )
+  );
 }

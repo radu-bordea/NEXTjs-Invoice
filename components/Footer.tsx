@@ -17,10 +17,10 @@ export function Footer() {
             <p>
               {/* mailto: stays a plain <a>: it opens the email client */}
               <a
-                href="mailto:radu.bordea.dev@gmail.com"
+                href="mailto:radubordea.digitalsolutions@gmail.com"
                 className="hover:text-teal-700"
               >
-                radu.bordea.dev@gmail.com
+                radubordea.digital.solutions@gmail.com
               </a>
             </p>
           </div>
