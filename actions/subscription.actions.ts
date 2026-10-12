@@ -1,17 +1,17 @@
-"use server"
+"use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server"
-import { getLocale } from "next-intl/server"
-import { redirect } from "next/navigation"
-import stripe from "@/lib/stripe"
-import prisma from "@/lib/prisma"
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { getLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
+import stripe from "@/lib/stripe";
+import prisma from "@/lib/prisma";
 
 /**
  * Stripe supports "nb" (Norwegian Bokmål) and "en". Anything that is
  * not Norwegian falls back to English.
  */
 async function getStripeLocale(): Promise<"nb" | "en"> {
-  return (await getLocale()) === "nb" ? "nb" : "en"
+  return (await getLocale()) === "nb" ? "nb" : "en";
 }
 
 /**
@@ -23,17 +23,17 @@ async function getStripeLocale(): Promise<"nb" | "en"> {
  * attempt), reuse it instead of creating a duplicate.
  */
 export async function createCheckoutSession() {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-  const user = await currentUser()
-  const email = user?.emailAddresses[0]?.emailAddress
+  const user = await currentUser();
+  const email = user?.emailAddresses[0]?.emailAddress;
 
   // Reuse an existing Stripe customer if we've seen this user before,
   // otherwise let Stripe create one during checkout.
   const existing = await prisma.subscription.findUnique({
     where: { userId },
-  })
+  });
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
@@ -44,6 +44,7 @@ export async function createCheckoutSession() {
       {
         price: process.env.STRIPE_PRICE_ID!,
         quantity: 1,
+        tax_rates: [process.env.STRIPE_TAX_RATE_ID!],
       },
     ],
     // Stripe appends session info to these URLs automatically.
@@ -53,24 +54,24 @@ export async function createCheckoutSession() {
     // webhook (built next session) knows who to credit when the
     // payment completes.
     metadata: { userId },
-  })
+  });
 
-  if (!session.url) throw new Error("Failed to create checkout session")
-  redirect(session.url)
+  if (!session.url) throw new Error("Failed to create checkout session");
+  redirect(session.url);
 }
 
 export async function createPortalSession() {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-  const sub = await prisma.subscription.findUnique({ where: { userId } })
-  if (!sub) throw new Error("No subscription found")
+  const sub = await prisma.subscription.findUnique({ where: { userId } });
+  if (!sub) throw new Error("No subscription found");
 
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripeCustomerId,
     locale: await getStripeLocale(),
     return_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-  })
+  });
 
-  redirect(session.url)
+  redirect(session.url);
 }
