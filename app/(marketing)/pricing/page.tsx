@@ -71,7 +71,7 @@ export default async function PricingPage() {
             <PlanRow included>{t("profile")}</PlanRow>
             <PlanRow included>{t("clients")}</PlanRow>
             <PlanRow included>{t("pdf")}</PlanRow>
-            <PlanRow included>{t("email")}</PlanRow>
+            <PlanRow included>{t("emailSoon")}</PlanRow>
             <PlanRow included>{t("reports")}</PlanRow>
           </ul>
 

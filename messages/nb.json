@@ -1,7 +1,7 @@
 {
   "Metadata": {
-    "title": "soloverk",
-    "description": "Fakturagenerator for norske frilansere"
+"title": "Soloverk – enkel fakturering for frilansere",
+"description": "Lag og last ned fakturaer som PDF. Laget for frilansere og enkeltpersonforetak i Norge."
   },
   "Common": {
     "save": "Lagre",
@@ -76,7 +76,8 @@
     "manage": "Administrer abonnement",
     "subscribe": "Abonner",
     "signUpToSubscribe": "Registrer deg for å abonnere",
-    "footnote": "Priser vises i NOK. Avslutt når som helst."
+    "footnote": "Priser vises i NOK. Avslutt når som helst.",
+    "emailSoon": "E-post til kunder (kommer snart)"
   },
   "Invoices": {
     "title": "Fakturaer",

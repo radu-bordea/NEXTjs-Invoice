@@ -1,7 +1,7 @@
 {
   "Metadata": {
-    "title": "soloverk",
-    "description": "Invoice generator for Norwegian freelancers"
+    "title": "Soloverk – simple invoicing for freelancers",
+    "description": "Create and download invoices as PDF. Built for freelancers and sole proprietors in Norway."
   },
   "Common": {
     "save": "Save",
@@ -76,7 +76,8 @@
     "manage": "Manage subscription",
     "subscribe": "Subscribe",
     "signUpToSubscribe": "Sign up to subscribe",
-    "footnote": "Prices shown in NOK. Cancel anytime."
+    "footnote": "Prices shown in NOK. Cancel anytime.",
+    "emailSoon": "Email to clients (coming soon)"
   },
   "Invoices": {
     "title": "Invoices",
