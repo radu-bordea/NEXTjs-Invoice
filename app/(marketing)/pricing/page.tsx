@@ -65,6 +65,7 @@ export default async function PricingPage() {
           <p className="text-sm text-gray-500 mb-6">
             {t("perMonth")} · {t("vatNote")}
           </p>
+          
 
           <ul className="space-y-3 text-sm flex-1">
             <PlanRow included>{t("invoicesUnlimited")}</PlanRow>
