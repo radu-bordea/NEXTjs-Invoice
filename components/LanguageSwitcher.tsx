@@ -11,7 +11,9 @@ const options: { value: Locale; label: string }[] = [
 ]
 
 export function LanguageSwitcher() {
-  const current = useLocale()
+  // useLocale() returns "en-GB" for English (see i18n/request.ts),
+  // so compare only the language part ("en" / "nb").
+  const current = useLocale().split("-")[0]
   const t = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
 
@@ -22,6 +24,7 @@ export function LanguageSwitcher() {
           key={option.value}
           type="button"
           disabled={isPending}
+          aria-pressed={current === option.value}
           onClick={() =>
             startTransition(async () => {
               await setLocale(option.value)
