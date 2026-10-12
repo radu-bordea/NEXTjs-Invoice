@@ -23,6 +23,7 @@
 - npx tsx prisma/reset.ts
 - npx prisma migrate dev --name add_subscription
 - npx prisma migrate dev --name add_vat_rate
+- npx prisma migrate reset
 
 
 
