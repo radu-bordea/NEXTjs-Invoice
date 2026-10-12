@@ -61,10 +61,10 @@ export default async function PricingPage() {
             {subscribed ? t("yourPlan") : t("mostPopular")}
           </span>
           <h2 className="text-xl font-semibold mb-1">{t("pro")}</h2>
-          <p className="text-3xl font-bold mb-1">NOK 149</p>
-<p className="text-sm text-gray-500 mb-6">
-  {t("perMonth")} · {t("vatNote")}
-</p>
+          <p className="text-3xl font-bold mb-1">NOK 99</p>
+          <p className="text-sm text-gray-500 mb-6">
+            {t("perMonth")} · {t("vatNote")}
+          </p>
 
           <ul className="space-y-3 text-sm flex-1">
             <PlanRow included>{t("invoicesUnlimited")}</PlanRow>

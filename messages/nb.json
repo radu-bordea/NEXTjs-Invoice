@@ -38,7 +38,8 @@
     "rights": "Alle rettigheter forbeholdt.",
     "pricing": "Priser",
     "terms": "Vilkår",
-    "privacy": "Personvernerklæring"
+    "privacy": "Personvernerklæring",
+    "tagline": "Enkel fakturering for frilansere og enkeltpersonforetak."
   },
   "UpgradePrompt": {
     "button": "Oppgrader til Pro"
@@ -357,7 +358,7 @@
         ],
         "items": [
           "Gratis: opptil 3 fakturaer per kalendermåned, firmaprofil, forhåndsutfylling av kunder og PDF-nedlasting.",
-          "Pro: 149 NOK per måned inkludert MVA. Ubegrenset antall fakturaer, e-postutsending til kunder (når funksjonen er tilgjengelig) og rapporter, inkludert eksport til bruk overfor Skatteetaten."
+          "Pro: 99 NOK per måned inkludert MVA. Ubegrenset antall fakturaer, e-postutsending til kunder (når funksjonen er tilgjengelig) og with rapporter, inkludert eksport av fakturadata."
         ]
       },
       {
@@ -481,7 +482,7 @@
         ],
         "items": [
           "Clerk: innlogging og brukerkontoer",
-          "Neon: databaselagring",
+          "Neon: databaselagring (data lagres i EU, Frankfurt)",
           "Vercel: hosting og levering av nettstedet",
           "Stripe: betaling og abonnement",
           "Resend: utsending av e-post (når funksjonen er aktivert)"
@@ -490,7 +491,7 @@
       {
         "title": "Overføring utenfor EØS",
         "paragraphs": [
-          "Noen av leverandørene våre behandler opplysninger i USA eller andre land utenfor EØS. Overføringene skjer på grunnlag av EU-kommisjonens standard personvernbestemmelser (SCC) og/eller EU–USA Data Privacy Framework, slik at opplysningene får et tilsvarende vern."
+          "Databasen med dataene dine ligger i EU. Likevel behandler noen av leverandørene våre opplysninger i USA eller andre land utenfor EØS. Overføringene skjer på grunnlag av EU-kommisjonens standard personvernbestemmelser (SCC) og/eller EU–USA Data Privacy Framework, slik at opplysningene får et tilsvarende vern."
         ]
       },
       {

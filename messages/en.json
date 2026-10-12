@@ -38,7 +38,8 @@
     "rights": "All rights reserved.",
     "pricing": "Pricing",
     "terms": "Terms of Service",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "tagline": "Simple invoicing for freelancers and sole proprietors."
   },
   "UpgradePrompt": {
     "button": "Upgrade to Pro"
@@ -357,7 +358,7 @@
         ],
         "items": [
           "Free: up to 3 invoices per calendar month, company profile, client prefill and PDF download.",
-          "Pro: NOK 149 per month including MVA (VAT). Unlimited invoices, emailing invoices to clients (when the feature is available) and reports, including export for use with Skatteetaten."
+          "Pro: NOK 99 per month including MVA (VAT). Unlimited invoices, emailing invoices to clients (when the feature is available) and reports, including export of invoice data."
         ]
       },
       {
@@ -481,7 +482,7 @@
         ],
         "items": [
           "Clerk: sign-in and user accounts",
-          "Neon: database storage",
+          "Neon: database storage (data is stored in the EU, Frankfurt)",
           "Vercel: hosting and delivery of the website",
           "Stripe: payments and subscriptions",
           "Resend: sending email (when the feature is enabled)"
@@ -490,7 +491,7 @@
       {
         "title": "Transfers outside the EEA",
         "paragraphs": [
-          "Some of our providers process data in the United States or other countries outside the EEA. Transfers are made on the basis of the European Commission’s Standard Contractual Clauses (SCCs) and/or the EU–US Data Privacy Framework, so that the data receives an equivalent level of protection."
+          "The database holding your data is located in the EU. However, some of our providers process data in the United States or other countries outside the EEA. Transfers are made on the basis of the European Commission’s Standard Contractual Clauses (SCCs) and/or the EU–US Data Privacy Framework, so that the data receives an equivalent level of protection."
         ]
       },
       {
