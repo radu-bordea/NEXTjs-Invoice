@@ -47,6 +47,10 @@ export default async function PricingPage() {
             <PlanRow>{t("reports")}</PlanRow>
           </ul>
 
+          <p className="mt-6 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900">
+            {t("firstMonth")}
+          </p>
+
           <Link
             href="/dashboard/invoices"
             className="mt-8 text-center px-6 py-3 rounded-full border border-gray-300 font-medium hover:bg-gray-50 transition-colors cursor-pointer"

@@ -68,7 +68,7 @@
     "clients": "Kundehistorikk og forhåndsutfylling",
     "pdf": "PDF-nedlasting",
     "email": "Send faktura på e-post til kunden",
-    "reports": "Rapporter og Skatteetaten-eksport",
+    "reports": "Rapporter og MVA-oversikt",
     "getStarted": "Kom i gang gratis",
     "goToDashboard": "Gå til dashbord",
     "renewsOn": "Fornyes {date}",
@@ -77,7 +77,8 @@
     "subscribe": "Abonner",
     "signUpToSubscribe": "Registrer deg for å abonnere",
     "footnote": "Priser vises i NOK. Avslutt når som helst.",
-    "emailSoon": "E-post til kunder (kommer snart)"
+    "emailSoon": "E-post til kunder (kommer snart)",
+    "firstMonth": "Ny bruker? Første måned: opptil 10 fakturaer og rapporter inkludert."
   },
   "Invoices": {
     "title": "Fakturaer",

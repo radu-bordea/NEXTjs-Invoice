@@ -68,7 +68,7 @@
     "clients": "Client history & prefill",
     "pdf": "PDF download",
     "email": "Email invoice to client",
-    "reports": "Reports & Skatteetaten export",
+    "reports": "Reports & MVA overview",
     "getStarted": "Get started free",
     "goToDashboard": "Go to dashboard",
     "renewsOn": "Renews on {date}",
@@ -77,7 +77,8 @@
     "subscribe": "Subscribe",
     "signUpToSubscribe": "Sign up to subscribe",
     "footnote": "Prices shown in NOK. Cancel anytime.",
-    "emailSoon": "Email to clients (coming soon)"
+    "emailSoon": "Email to clients (coming soon)",
+    "firstMonth": "New here? First month: up to 10 invoices and reports included."
   },
   "Invoices": {
     "title": "Invoices",

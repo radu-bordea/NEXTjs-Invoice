@@ -8,5 +8,5 @@ export const LEGAL = {
   orgNr: "935 492 513",
   email: "radubordea.digitalsolutions@gmail.com", // TODO: contact address (use your .no domain)
   address: "Garnveien 32 A, 8013 Bodø", // TODO: business address
-  lastUpdated: "2026-10-12",
+  lastUpdated: "2026-10-13",
 }
