@@ -34,7 +34,7 @@ model Invoice {
   id     String @id @default(cuid())
   userId String
 
-  invoiceNumber String
+  invoiceNumber String?
   invoiceDate   DateTime
   dueDate       DateTime
   periodStart   DateTime?

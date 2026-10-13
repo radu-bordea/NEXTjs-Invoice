@@ -69,7 +69,9 @@ export default async function InvoiceViewPage({
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold">
-              {t("title", { number: invoice.invoiceNumber })}
+              {invoice.invoiceNumber
+                ? t("title", { number: invoice.invoiceNumber })
+                : t("titleDraft")}
             </h1>
             <StatusBadge status={invoice.status} />
           </div>

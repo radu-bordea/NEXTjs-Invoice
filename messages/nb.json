@@ -96,7 +96,8 @@
     "view": "Vis",
     "edit": "Rediger",
     "downloadPdf": "Last ned PDF",
-    "duplicate": "Dupliser"
+    "duplicate": "Dupliser",
+    "draftNumber": "Utkast"
   },
   "ClientSearch": {
     "placeholder": "Søk etter kunde..."
@@ -141,7 +142,8 @@
     "usage": "{used} av {limit} gratis fakturaer brukt denne måneden"
   },
   "EditInvoice": {
-    "title": "Rediger faktura {number}"
+    "title": "Rediger faktura {number}",
+    "titleDraft": "Rediger fakturautkast"
   },
   "InvoiceView": {
     "title": "Faktura {number}",
@@ -171,14 +173,15 @@
     "account": "IBAN / kontonummer:",
     "bank": "Bank:",
     "currency": "Valuta:",
-    "mvaRegisteredFrom": "MVA-registrert fra {date}"
+    "mvaRegisteredFrom": "MVA-registrert fra {date}",
+    "titleDraft": "Fakturautkast"
   },
   "StatusButtons": {
     "markSent": "Marker som sendt",
     "markPaid": "Marker som betalt",
     "revert": "Tilbake til utkast",
     "paidNote": "✓ Denne fakturaen er markert som betalt.",
-    "confirmSent": "Markere denne fakturaen som sendt? Det betyr at den er levert til kunden.",
+    "confirmSent": "Markere fakturaen som sendt? Den får nå sitt endelige fakturanummer.",
     "confirmPaid": "Markere denne fakturaen som betalt? Dette er en endelig status og kan ikke angres.",
     "confirmRevert": "Sette denne fakturaen tilbake til utkast? Den vil ikke lenger være markert som sendt."
   },
@@ -312,7 +315,8 @@
     "bank": "Bank",
     "currency": "Valuta",
     "taxNote": "Skatt på inntekt er forretningseierens ansvar og er ikke inkludert i fakturabeløpet.",
-    "mvaRegisteredFrom": "MVA-registrert fra {date}"
+    "mvaRegisteredFrom": "MVA-registrert fra {date}",
+    "draft": "Utkast"
   },
   "ReportPDF": {
     "orgNr": "Org.nr",

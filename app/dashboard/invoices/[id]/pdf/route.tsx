@@ -41,10 +41,15 @@ export async function GET(
     <InvoicePDF invoice={invoice} t={t} dateLocale={dateLocale} />
   )
 
+  // Drafts have no invoice number yet, so they get a generic file name.
+  const fileName = invoice.invoiceNumber
+    ? `invoice-${invoice.invoiceNumber}.pdf`
+    : "invoice-draft.pdf"
+
   return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`,
+      "Content-Disposition": `attachment; filename="${fileName}"`,
     },
   })
 }

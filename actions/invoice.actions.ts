@@ -21,32 +21,86 @@ export type CreateInvoiceState = {
   submittedValues?: Record<string, string>;
 };
 
+type InvoiceStatusValue = "DRAFT" | "SENT" | "PAID";
+
 /**
- * Generates the next invoice number for the current user, scoped
- * per calendar year — e.g. "2026-01", "2026-02", ...
+ * Allowed status changes. PAID is final. SENT can go back to DRAFT
+ * (e.g. marked as sent by mistake); the invoice number it already got
+ * is kept, never released.
+ */
+const ALLOWED_TRANSITIONS: Record<InvoiceStatusValue, InvoiceStatusValue[]> = {
+  DRAFT: ["SENT"],
+  SENT: ["PAID", "DRAFT"],
+  PAID: [],
+};
+
+/** True when a database call failed because of a unique constraint. */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
+
+/**
+ * Works out the next invoice number for the current user, scoped per
+ * calendar year — e.g. "2026-01", "2026-02", ... "2026-100".
  *
- * Looks at the highest existing number for the current year and
- * increments it. Starts fresh at "-01" each new year.
+ * Only invoices that already HAVE a number count (drafts have none).
+ * The highest sequence is found numerically, so it keeps working past
+ * 99 invoices a year.
  */
 async function getNextInvoiceNumber(userId: string): Promise<string> {
   const currentYear = new Date().getFullYear();
 
-  const lastInvoice = await prisma.invoice.findFirst({
+  const numbered = await prisma.invoice.findMany({
     where: {
       userId,
       invoiceNumber: { startsWith: `${currentYear}-` },
     },
-    orderBy: { invoiceNumber: "desc" },
+    select: { invoiceNumber: true },
   });
 
-  if (!lastInvoice) {
-    return `${currentYear}-01`;
+  let highest = 0;
+  for (const { invoiceNumber } of numbered) {
+    const sequence = parseInt((invoiceNumber ?? "").split("-")[1], 10);
+    if (!Number.isNaN(sequence) && sequence > highest) highest = sequence;
   }
 
-  const lastSequence = parseInt(lastInvoice.invoiceNumber.split("-")[1], 10);
-  const nextSequence = (lastSequence + 1).toString().padStart(2, "0");
+  return `${currentYear}-${(highest + 1).toString().padStart(2, "0")}`;
+}
 
-  return `${currentYear}-${nextSequence}`;
+/**
+ * Moves an unnumbered invoice out of DRAFT and gives it the next
+ * number in one single update. The database rule "unique per user +
+ * number" guarantees two invoices can never share a number: if two
+ * requests pick the same number at the same moment, the second one
+ * fails and simply tries again with a fresh number. A failed attempt
+ * uses up no number, so the sequence has no gaps.
+ */
+async function setStatusAndAssignNumber(
+  invoiceId: string,
+  userId: string,
+  newStatus: "SENT" | "PAID",
+) {
+  const maxAttempts = 5;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const invoiceNumber = await getNextInvoiceNumber(userId);
+
+    try {
+      await prisma.invoice.update({
+        where: { id: invoiceId },
+        data: { status: newStatus, invoiceNumber },
+      });
+      return;
+    } catch (error) {
+      if (isUniqueViolation(error) && attempt < maxAttempts) continue;
+      throw error;
+    }
+  }
 }
 
 /**
@@ -57,6 +111,10 @@ async function getNextInvoiceNumber(userId: string): Promise<string> {
  * future edits to the profile never retroactively change past
  * invoices. Also snapshots mvaRegisteredFrom the same way, for the
  * per-line-item VAT calculation we'll do at PDF-generation time.
+ *
+ * The invoice is created as a DRAFT WITHOUT an invoice number. The
+ * number is assigned when the invoice is first sent (see
+ * updateInvoiceStatus), so issued invoices form an unbroken sequence.
  *
  * The MVA rate (vatRate) is chosen per invoice on the form.
  *
@@ -123,9 +181,9 @@ export async function createInvoice(
     currency: formData.get("currency") || "NOK",
     vatRate: formData.get("vatRate") || undefined,
     lineItems,
-    // invoiceNumber is generated server-side below, not submitted
-    // by the form — placeholder here just so the schema has
-    // something to validate against before we overwrite it.
+    // The invoice number is not submitted by the form and is not saved
+    // here (drafts have none). This placeholder only lets the schema
+    // validate; it is never written to the database.
     invoiceNumber: "pending",
   };
 
@@ -154,12 +212,11 @@ export async function createInvoice(
   }
 
   const data = parsed.data;
-  const invoiceNumber = await getNextInvoiceNumber(userId);
 
   await prisma.invoice.create({
     data: {
       userId,
-      invoiceNumber,
+      // invoiceNumber is left empty on purpose: assigned when sent.
       invoiceDate: new Date(data.invoiceDate),
       dueDate: new Date(data.dueDate),
       periodStart: data.periodStart ? new Date(data.periodStart) : null,
@@ -206,13 +263,18 @@ export async function createInvoice(
 }
 
 /**
- * Updates just the status field of an invoice (DRAFT -> SENT -> PAID).
- * Confirms the invoice belongs to the logged-in user before updating,
- * since invoice IDs are visible/guessable in the URL.
+ * Changes the status of an invoice (DRAFT -> SENT -> PAID, or
+ * SENT -> DRAFT). Confirms the invoice belongs to the logged-in user
+ * and that the change is allowed, since invoice IDs are visible in
+ * the URL and server actions can be called directly.
+ *
+ * The first time an invoice leaves DRAFT it receives its invoice
+ * number. The number is never changed or released afterwards, not
+ * even if the invoice is reverted to DRAFT and sent again.
  */
 export async function updateInvoiceStatus(
   invoiceId: string,
-  newStatus: "DRAFT" | "SENT" | "PAID",
+  newStatus: InvoiceStatusValue,
 ) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
@@ -225,10 +287,18 @@ export async function updateInvoiceStatus(
     throw new Error("Invoice not found");
   }
 
-  await prisma.invoice.update({
-    where: { id: invoiceId },
-    data: { status: newStatus },
-  });
+  if (!ALLOWED_TRANSITIONS[invoice.status].includes(newStatus)) {
+    throw new Error("This status change is not allowed");
+  }
+
+  if (newStatus === "DRAFT" || invoice.invoiceNumber) {
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: { status: newStatus },
+    });
+  } else {
+    await setStatusAndAssignNumber(invoiceId, userId, newStatus);
+  }
 
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   revalidatePath("/dashboard/invoices");
@@ -309,9 +379,9 @@ export async function updateInvoice(
     currency: formData.get("currency") || "NOK",
     vatRate: formData.get("vatRate") || undefined,
     lineItems,
-    // Keep the existing invoice number — it's immutable once
-    // assigned, never regenerated on edit.
-    invoiceNumber: existingInvoice.invoiceNumber,
+    // The invoice number is never changed by an edit; this value only
+    // satisfies the schema (a draft may not have a number yet).
+    invoiceNumber: existingInvoice.invoiceNumber ?? "pending",
   };
 
   const parsed = invoiceSchema.safeParse(raw);
@@ -381,6 +451,7 @@ export async function updateInvoice(
   revalidatePath("/dashboard/invoices");
   redirect(`/dashboard/invoices/${invoiceId}`);
 }
+
 /**
  * Returns the logged-in user's distinct past clients, most
  * recently used first. Powers the client-prefill autocomplete on

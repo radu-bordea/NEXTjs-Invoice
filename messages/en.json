@@ -96,7 +96,8 @@
     "view": "View",
     "edit": "Edit",
     "downloadPdf": "Download PDF",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "draftNumber": "Draft"
   },
   "ClientSearch": {
     "placeholder": "Search client..."
@@ -141,7 +142,8 @@
     "usage": "{used} of {limit} free invoices used this month"
   },
   "EditInvoice": {
-    "title": "Edit invoice {number}"
+    "title": "Edit invoice {number}",
+    "titleDraft": "Edit invoice draft"
   },
   "InvoiceView": {
     "title": "Invoice {number}",
@@ -171,14 +173,15 @@
     "account": "IBAN / account:",
     "bank": "Bank:",
     "currency": "Currency:",
-    "mvaRegisteredFrom": "MVA-registered from {date}"
+    "mvaRegisteredFrom": "MVA-registered from {date}",
+    "titleDraft": "Invoice draft"
   },
   "StatusButtons": {
     "markSent": "Mark as sent",
     "markPaid": "Mark as paid",
     "revert": "Revert to draft",
     "paidNote": "✓ This invoice is marked as paid.",
-    "confirmSent": "Mark this invoice as sent? This means it's been delivered to the client.",
+    "confirmSent": "Mark this invoice as sent? It will now get its final invoice number.",
     "confirmPaid": "Mark this invoice as paid? This is a final status and cannot be undone.",
     "confirmRevert": "Revert this invoice back to draft? It will no longer be marked as sent."
   },
@@ -312,7 +315,8 @@
     "bank": "Bank",
     "currency": "Currency",
     "taxNote": "Tax on income is the responsibility of the business owner and is not included in the invoice amount.",
-    "mvaRegisteredFrom": "MVA-registered from {date}"
+    "mvaRegisteredFrom": "MVA-registered from {date}",
+    "draft": "Draft"
   },
   "ReportPDF": {
     "orgNr": "Org.nr",

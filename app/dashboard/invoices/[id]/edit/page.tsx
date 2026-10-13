@@ -51,7 +51,9 @@ export default async function EditInvoicePage({
   return (
     <main className="max-w-3xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">
-        {t("title", { number: invoice.invoiceNumber })}
+        {invoice.invoiceNumber
+          ? t("title", { number: invoice.invoiceNumber })
+          : t("titleDraft")}
       </h1>
       <InvoiceForm invoice={invoice} mvaRegistered={mvaRegistered} />
     </main>

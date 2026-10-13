@@ -35,19 +35,24 @@ const SORT_KEYS: SortKey[] = [
  * sorted afterwards. A tie-breaker keeps the order stable.
  */
 function buildOrderBy(sort: SortKey, dir: SortDir) {
+  // Drafts have no invoice number yet; "nulls: last" keeps them at the end.
+  const numberDesc = {
+    invoiceNumber: { sort: "desc" as const, nulls: "last" as const },
+  };
+
   switch (sort) {
     case "number":
-      return [{ invoiceNumber: dir }];
+      return [{ invoiceNumber: { sort: dir, nulls: "last" as const } }];
     case "client":
-      return [{ clientName: dir }, { invoiceNumber: "desc" as const }];
+      return [{ clientName: dir }, numberDesc];
     case "due":
-      return [{ dueDate: dir }, { invoiceNumber: "desc" as const }];
+      return [{ dueDate: dir }, numberDesc];
     case "status":
-      return [{ status: dir }, { invoiceNumber: "desc" as const }];
+      return [{ status: dir }, numberDesc];
     case "date":
     case "amount":
     default:
-      return [{ invoiceDate: dir }, { invoiceNumber: "desc" as const }];
+      return [{ invoiceDate: dir }, numberDesc];
   }
 }
 
@@ -113,7 +118,9 @@ export default async function InvoicesPage({
     rows.sort((a, b) => {
       const diff = Number(a.total) - Number(b.total);
       if (diff !== 0) return diff * factor;
-      return b.invoice.invoiceNumber.localeCompare(a.invoice.invoiceNumber);
+      return (b.invoice.invoiceNumber ?? "").localeCompare(
+        a.invoice.invoiceNumber ?? "",
+      );
     });
   }
 
@@ -247,7 +254,9 @@ export default async function InvoicesPage({
                   className={index % 2 === 0 ? "bg-white" : "bg-[#f3f8f5]"}
                 >
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">
-                    {invoice.invoiceNumber}
+                    {invoice.invoiceNumber ?? (
+                      <span className="text-gray-400">{t("draftNumber")}</span>
+                    )}
                   </td>
 
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">

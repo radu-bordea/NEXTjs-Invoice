@@ -298,7 +298,7 @@ export function InvoicePDF({
           <View style={styles.metaBox}>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>{t("invoiceNumber")}</Text>
-              <Text>{invoice.invoiceNumber}</Text>
+              <Text>{invoice.invoiceNumber ?? t("draft")}</Text>
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>{t("invoiceDate")}</Text>
