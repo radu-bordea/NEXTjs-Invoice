@@ -174,7 +174,9 @@
     "bank": "Bank:",
     "currency": "Valuta:",
     "mvaRegisteredFrom": "MVA-registrert fra {date}",
-    "titleDraft": "Fakturautkast"
+    "titleDraft": "Fakturautkast",
+    "invoiceNumber": "Fakturanummer",
+    "draftNumber": "Utkast"
   },
   "StatusButtons": {
     "markSent": "Marker som sendt",

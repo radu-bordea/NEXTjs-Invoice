@@ -174,7 +174,9 @@
     "bank": "Bank:",
     "currency": "Currency:",
     "mvaRegisteredFrom": "MVA-registered from {date}",
-    "titleDraft": "Invoice draft"
+    "titleDraft": "Invoice draft",
+    "invoiceNumber": "Invoice number",
+    "draftNumber": "Draft"
   },
   "StatusButtons": {
     "markSent": "Mark as sent",

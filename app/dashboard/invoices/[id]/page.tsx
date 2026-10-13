@@ -137,6 +137,10 @@ export default async function InvoiceViewPage({
 
               <div className="text-sm space-y-2 pt-1">
                 <p className="flex justify-between gap-4">
+                  <span className="text-gray-500">{t("invoiceNumber")}</span>
+                  <span>{invoice.invoiceNumber ?? t("draftNumber")}</span>
+                </p>
+                <p className="flex justify-between gap-4">
                   <span className="text-gray-500">{lbl(t("invoiceDate"))}</span>
                   <span>{fmtDate(invoice.invoiceDate)}</span>
                 </p>
