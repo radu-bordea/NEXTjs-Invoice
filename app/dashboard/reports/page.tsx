@@ -11,7 +11,7 @@ import { RevenueChart } from "@/components/reports/RevenueChart";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 
-import { isUserSubscribed } from "@/lib/subscription";
+import { canViewReports } from "@/lib/subscription";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
@@ -37,7 +37,7 @@ export default async function ReportsPage({
       year: "numeric",
     });
 
-  if (!(await isUserSubscribed(userId))) {
+  if (!(await canViewReports(userId))) {
     return (
       <main className="p-4 sm:p-8 max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>

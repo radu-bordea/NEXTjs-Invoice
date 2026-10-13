@@ -1,7 +1,7 @@
 {
   "Metadata": {
-"title": "Soloverk – enkel fakturering for frilansere",
-"description": "Lag og last ned fakturaer som PDF. Laget for frilansere og enkeltpersonforetak i Norge."
+    "title": "Soloverk – enkel fakturering for frilansere",
+    "description": "Lag og last ned fakturaer som PDF. Laget for frilansere og enkeltpersonforetak i Norge."
   },
   "Common": {
     "save": "Lagre",
@@ -359,7 +359,8 @@
         ],
         "items": [
           "Gratis: opptil 3 fakturaer per kalendermåned, firmaprofil, forhåndsutfylling av kunder og PDF-nedlasting.",
-          "Pro: 99 NOK per måned inkludert MVA. Ubegrenset antall fakturaer, e-postutsending til kunder (når funksjonen er tilgjengelig) og with rapporter, inkludert eksport av fakturadata."
+          "Pro: 99 NOK per måned inkludert MVA. Ubegrenset antall fakturaer og rapporter. E-postutsending til kunder og eksport av fakturadata kommer og er inkludert når funksjonene er tilgjengelige.",
+          "Første måned for nye brukere: opptil 10 fakturaer og tilgang til rapporter, uten betaling. Måneden starter når du lager din første faktura og varer i 30 dager. Deretter gjelder Gratis-planen, med mindre du abonnerer på Pro. Vi kan endre eller avslutte tilbudet for nye brukere."
         ]
       },
       {
@@ -543,5 +544,11 @@
         ]
       }
     ]
+  },
+  "Trial": {
+    "title": "Velkommen! Tilbud for din første måned",
+    "included": "Du kan lage opptil {limit} fakturaer og bruke rapporter.",
+    "daysLeft": "{days, plural, one {# dag} other {# dager}} igjen av tilbudet.",
+    "notStarted": "Tilbudet varer i {days} dager fra du lager din første faktura."
   }
 }

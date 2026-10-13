@@ -353,13 +353,14 @@
         ]
       },
       {
-        "title": "Plans and prices",
+        "title": "Plans and pricing",
         "paragraphs": [
-          "The service has two plans. We may develop the content of the plans over time, but we will not change the price of an ongoing subscription without notice (see section 4)."
+          "The service has two plans. We may develop the content of the plans over time, but we will not change the price of a running subscription without notice (see section 4)."
         ],
         "items": [
           "Free: up to 3 invoices per calendar month, company profile, client prefill and PDF download.",
-          "Pro: NOK 99 per month including MVA (VAT). Unlimited invoices, emailing invoices to clients (when the feature is available) and reports, including export of invoice data."
+          "Pro: NOK 99 per month including MVA (VAT). Unlimited invoices and reports. Email sending to clients and export of invoice data are coming and will be included when available.",
+          "First month for new users: up to 10 invoices and access to reports, at no charge. The month starts when you create your first invoice and lasts 30 days. After that the Free plan applies unless you subscribe to Pro. We may change or end this offer for new users."
         ]
       },
       {
@@ -543,5 +544,11 @@
         ]
       }
     ]
+  },
+  "Trial": {
+    "title": "Welcome! Your first-month offer",
+    "included": "You can create up to {limit} invoices and use reports.",
+    "daysLeft": "{days, plural, one {# day} other {# days}} left of the offer.",
+    "notStarted": "The offer lasts {days} days from your first invoice."
   }
 }

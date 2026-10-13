@@ -5,6 +5,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
+import { TrialNotice } from "@/components/TrialNotice";
 
 import {
   Eye,
@@ -133,6 +134,8 @@ export default async function InvoicesPage({
           {t("newInvoice")}
         </Link>
       </div>
+
+      <TrialNotice />
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex gap-2">

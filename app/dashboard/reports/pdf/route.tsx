@@ -4,7 +4,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ReportPDF } from "@/components/reports/ReportPDF";
 import { getMvaPeriod, getPeriodDateRange } from "@/lib/invoice-reports";
 import { NextResponse } from "next/server";
-import { isUserSubscribed } from "@/lib/subscription";
+import { canViewReports } from "@/lib/subscription";
 import { getPdfI18n } from "@/lib/pdf-i18n";
 
 export async function GET(request: Request) {
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  if (!(await isUserSubscribed(userId))) {
+  if (!(await canViewReports(userId))) {
     return new NextResponse("Pro subscription required", { status: 403 });
   }
 
