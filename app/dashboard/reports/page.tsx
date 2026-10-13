@@ -68,6 +68,7 @@ export default async function ReportsPage({
         lt: dateRange.end,
       },
     },
+    orderBy: [{ invoiceDate: "asc" }, { invoiceNumber: "asc" }],
     include: { lineItems: true },
   });
 

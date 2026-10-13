@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       },
     },
     include: { lineItems: true },
-    orderBy: { invoiceDate: "asc" },
+    orderBy: [{ invoiceDate: "asc" }, { invoiceNumber: "asc" }],
   });
 
   const { t, getT, dateLocale } = await getPdfI18n("ReportPDF");
