@@ -38,7 +38,7 @@ export function ClientSearchInput() {
         params.delete("client");
       }
 
-      router.push(`/dashboard/invoices?${params.toString()}`);
+      router.replace(`/dashboard/invoices?${params.toString()}`);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, 300);
 

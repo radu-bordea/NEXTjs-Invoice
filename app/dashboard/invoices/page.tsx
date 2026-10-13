@@ -6,21 +6,76 @@ import { ClientSearchInput } from "@/components/invoice/ClientSearchInput";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
 
-import { Eye, Pencil, FileDown, Copy } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  FileDown,
+  Copy,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUpDown,
+} from "lucide-react";
+
+type SortKey = "number" | "client" | "date" | "due" | "amount" | "status";
+type SortDir = "asc" | "desc";
+
+const SORT_KEYS: SortKey[] = [
+  "number",
+  "client",
+  "date",
+  "due",
+  "amount",
+  "status",
+];
 
 /**
- * Invoice list page. Supports filtering by status and searching by
- * client name via the URL (?status=DRAFT&client=acme).
+ * Database ordering for every sortable column except "amount".
+ * Amount is calculated in code (not a database column), so it is
+ * sorted afterwards. A tie-breaker keeps the order stable.
+ */
+function buildOrderBy(sort: SortKey, dir: SortDir) {
+  switch (sort) {
+    case "number":
+      return [{ invoiceNumber: dir }];
+    case "client":
+      return [{ clientName: dir }, { invoiceNumber: "desc" as const }];
+    case "due":
+      return [{ dueDate: dir }, { invoiceNumber: "desc" as const }];
+    case "status":
+      return [{ status: dir }, { invoiceNumber: "desc" as const }];
+    case "date":
+    case "amount":
+    default:
+      return [{ invoiceDate: dir }, { invoiceNumber: "desc" as const }];
+  }
+}
+
+/**
+ * Invoice list page. Supports filtering by status, searching by client
+ * name and sorting by column, all via the URL
+ * (?status=DRAFT&client=acme&sort=due&dir=asc).
  */
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; client?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    client?: string;
+    sort?: string;
+    dir?: string;
+  }>;
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const { status, client } = await searchParams;
+  const { status, client, sort: sortParam, dir: dirParam } = await searchParams;
+
+  // Only accept known values from the URL. Default: newest date first.
+  const sort: SortKey = SORT_KEYS.includes(sortParam as SortKey)
+    ? (sortParam as SortKey)
+    : "date";
+  const dir: SortDir =
+    dirParam === "asc" || dirParam === "desc" ? dirParam : "desc";
 
   const t = await getTranslations("Invoices");
   const tStatus = await getTranslations("Status");
@@ -35,9 +90,31 @@ export default async function InvoicesPage({
         ? { clientName: { contains: client, mode: "insensitive" } }
         : {}),
     },
-    orderBy: { invoiceDate: "desc" },
+    orderBy: buildOrderBy(sort, dir),
     include: { lineItems: true },
   });
+
+  // Calculate each invoice total once; it is used for display and sorting.
+  const rows = invoices.map((invoice) => ({
+    invoice,
+    total: calculateInvoiceTotals({
+      billingType: invoice.billingType,
+      fixedPrice: invoice.fixedPrice ? Number(invoice.fixedPrice) : null,
+      lineItems: invoice.lineItems,
+      mvaRegisteredFrom: invoice.mvaRegisteredFrom,
+      invoiceDate: invoice.invoiceDate,
+      vatRate: invoice.vatRate,
+    }).grandTotal,
+  }));
+
+  if (sort === "amount") {
+    const factor = dir === "asc" ? 1 : -1;
+    rows.sort((a, b) => {
+      const diff = Number(a.total) - Number(b.total);
+      if (diff !== 0) return diff * factor;
+      return b.invoice.invoiceNumber.localeCompare(a.invoice.invoiceNumber);
+    });
+  }
 
   const dateOptions = {
     day: "2-digit",
@@ -64,58 +141,96 @@ export default async function InvoicesPage({
             status={undefined}
             current={status}
             client={client}
+            sort={sortParam}
+            dir={dirParam}
           />
           <FilterLink
             label={tStatus("DRAFT")}
             status="DRAFT"
             current={status}
             client={client}
+            sort={sortParam}
+            dir={dirParam}
           />
           <FilterLink
             label={tStatus("SENT")}
             status="SENT"
             current={status}
             client={client}
+            sort={sortParam}
+            dir={dirParam}
           />
           <FilterLink
             label={tStatus("PAID")}
             status="PAID"
             current={status}
             client={client}
+            sort={sortParam}
+            dir={dirParam}
           />
         </div>
 
         <ClientSearchInput />
       </div>
 
-      {invoices.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="text-gray-500">{t("noInvoices")}</p>
       ) : (
         <div className="w-full overflow-x-auto rounded-xl border border-[#d6e4db]">
           <table className="w-full min-w-225 text-sm border-collapse text-left">
             <thead>
               <tr className="bg-[#dcebe2] text-left text-[#1f4d3f]">
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("number")}
-                </th>
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("client")}
-                </th>
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("date")}
-                </th>
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("due")}
-                </th>
+                <SortHeader
+                  label={t("number")}
+                  column="number"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
+                <SortHeader
+                  label={t("client")}
+                  column="client"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
+                <SortHeader
+                  label={t("date")}
+                  column="date"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
+                <SortHeader
+                  label={t("due")}
+                  column="due"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
                 <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("type")}
                 </th>
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("amount")}
-                </th>
-                <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
-                  {t("status")}
-                </th>
+                <SortHeader
+                  label={t("amount")}
+                  column="amount"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
+                <SortHeader
+                  label={t("status")}
+                  column="status"
+                  sort={sort}
+                  dir={dir}
+                  status={status}
+                  client={client}
+                />
                 <th className="py-3 px-3 text-left font-medium whitespace-nowrap">
                   {t("actions")}
                 </th>
@@ -123,7 +238,7 @@ export default async function InvoicesPage({
             </thead>
 
             <tbody>
-              {invoices.map((invoice, index) => (
+              {rows.map(({ invoice, total }, index) => (
                 <tr
                   key={invoice.id}
                   className={index % 2 === 0 ? "bg-white" : "bg-[#f3f8f5]"}
@@ -153,19 +268,10 @@ export default async function InvoicesPage({
 
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">
                     {invoice.currency}{" "}
-                    {format.number(
-                      calculateInvoiceTotals({
-                        billingType: invoice.billingType,
-                        fixedPrice: invoice.fixedPrice
-                          ? Number(invoice.fixedPrice)
-                          : null,
-                        lineItems: invoice.lineItems,
-                        mvaRegisteredFrom: invoice.mvaRegisteredFrom,
-                        invoiceDate: invoice.invoiceDate,
-                        vatRate: invoice.vatRate,
-                      }).grandTotal,
-                      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
-                    )}
+                    {format.number(total, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </td>
 
                   <td className="py-2.5 px-3 text-left whitespace-nowrap">
@@ -236,24 +342,30 @@ export default async function InvoicesPage({
 
 /**
  * A single status filter pill: a plain link that sets/clears the
- * "status" query param while preserving any active client search.
+ * "status" query param while preserving the client search and sorting.
  */
 function FilterLink({
   label,
   status,
   current,
   client,
+  sort,
+  dir,
 }: {
   label: string;
   status: string | undefined;
   current: string | undefined;
   client: string | undefined;
+  sort: string | undefined;
+  dir: string | undefined;
 }) {
   const isActive = status === current;
 
   const params = new URLSearchParams();
   if (status) params.set("status", status);
   if (client) params.set("client", client);
+  if (sort) params.set("sort", sort);
+  if (dir) params.set("dir", dir);
   const query = params.toString();
   const href = `/dashboard/invoices${query ? `?${query}` : ""}`;
 
@@ -268,5 +380,61 @@ function FilterLink({
     >
       {label}
     </Link>
+  );
+}
+
+/**
+ * A clickable table header. First click on a column sorts ascending,
+ * clicking the active column again flips the direction. Status filter
+ * and client search are preserved.
+ */
+function SortHeader({
+  label,
+  column,
+  sort,
+  dir,
+  status,
+  client,
+}: {
+  label: string;
+  column: SortKey;
+  sort: SortKey;
+  dir: SortDir;
+  status: string | undefined;
+  client: string | undefined;
+}) {
+  const isActive = sort === column;
+  const nextDir: SortDir = isActive && dir === "asc" ? "desc" : "asc";
+
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (client) params.set("client", client);
+  params.set("sort", column);
+  params.set("dir", nextDir);
+  const href = `/dashboard/invoices?${params.toString()}`;
+
+  return (
+    <th
+      className="py-3 px-3 text-left font-medium whitespace-nowrap"
+      aria-sort={
+        isActive ? (dir === "asc" ? "ascending" : "descending") : "none"
+      }
+    >
+      <Link
+        href={href}
+        className="inline-flex items-center gap-1 hover:text-teal-700"
+      >
+        {label}
+        {isActive ? (
+          dir === "asc" ? (
+            <ArrowUp size={14} />
+          ) : (
+            <ArrowDown size={14} />
+          )
+        ) : (
+          <ChevronsUpDown size={14} className="opacity-40" />
+        )}
+      </Link>
+    </th>
   );
 }
