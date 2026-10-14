@@ -557,5 +557,9 @@
     "included": "You can create up to {limit} invoices and use reports.",
     "daysLeft": "{days, plural, one {# day} other {# days}} left of the offer.",
     "notStarted": "The offer lasts {days} days from your first invoice."
+  },
+  "DeleteInvoice": {
+    "button": "Delete draft",
+    "confirm": "Delete this draft? This cannot be undone."
   }
 }

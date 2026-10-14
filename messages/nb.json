@@ -557,5 +557,9 @@
     "included": "Du kan lage opptil {limit} fakturaer og bruke rapporter.",
     "daysLeft": "{days, plural, one {# dag} other {# dager}} igjen av tilbudet.",
     "notStarted": "Tilbudet varer i {days} dager fra du lager din første faktura."
+  },
+  "DeleteInvoice": {
+    "button": "Slett utkast",
+    "confirm": "Slette dette utkastet? Det kan ikke angres."
   }
 }

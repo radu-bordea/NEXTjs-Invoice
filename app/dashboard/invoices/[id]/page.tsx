@@ -7,6 +7,7 @@ import { StatusButtons } from "@/components/invoice/StatusButtons";
 import { StatusBadge } from "@/components/invoice/StatusBadge";
 import { ViewNotice } from "@/components/invoice/ViewNotice";
 import { calculateInvoiceTotals } from "@/lib/invoice-calculations";
+import { DeleteInvoiceButton } from "@/components/invoice/DeleteInvoiceButton";
 
 /** Removes a trailing colon from labels like "Fakturadato:" */
 const lbl = (s: string) => s.replace(/:\s*$/, "");
@@ -88,6 +89,9 @@ export default async function InvoiceViewPage({
             >
               {t("downloadPdf")}
             </a>
+            {invoice.status === "DRAFT" && !invoice.invoiceNumber && (
+              <DeleteInvoiceButton invoiceId={invoice.id} />
+            )}
           </div>
         </div>
 

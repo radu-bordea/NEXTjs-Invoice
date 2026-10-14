@@ -305,6 +305,40 @@ export async function updateInvoiceStatus(
 }
 
 /**
+ * Permanently deletes a DRAFT invoice that has never been numbered.
+ *
+ * Only unnumbered drafts can be deleted: they never existed as issued
+ * invoices, so removing them cannot leave a gap in the number series.
+ * Sent and paid invoices, and drafts that were reverted from Sent
+ * (they still hold their number), are never deletable.
+ *
+ * The conditions sit inside the delete itself, so ownership, status
+ * and "no number" are checked atomically: if the invoice is sent at
+ * the same moment, nothing is deleted. Line items are removed
+ * automatically (onDelete: Cascade).
+ */
+export async function deleteInvoice(invoiceId: string) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const result = await prisma.invoice.deleteMany({
+    where: {
+      id: invoiceId,
+      userId,
+      status: "DRAFT",
+      invoiceNumber: null,
+    },
+  });
+
+  if (result.count === 0) {
+    throw new Error("Only your own unnumbered drafts can be deleted");
+  }
+
+  revalidatePath("/dashboard/invoices");
+  redirect("/dashboard/invoices");
+}
+
+/**
  * Updates an existing DRAFT invoice for the logged-in user.
  *
  * Confirms ownership and that the invoice is still in DRAFT status
