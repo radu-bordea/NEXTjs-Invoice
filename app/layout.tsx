@@ -6,6 +6,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default async function RootLayout({
             <Toaster position="top-center" richColors />
           </NextIntlClientProvider>
         </ClerkProvider>
+        <Analytics />
       </body>
     </html>
   );

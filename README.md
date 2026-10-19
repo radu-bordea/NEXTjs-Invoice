@@ -11,6 +11,7 @@
 - npm install recharts
 - npm install stripe
 - npm install @clerk/localizations
+- npm i @vercel/analytics
 
 # files
 - find app -type f
